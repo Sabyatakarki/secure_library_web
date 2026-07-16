@@ -27,6 +27,30 @@ const profileStorage = multer.diskStorage({
   },
 });
 
+
+const bookStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(
+      __dirname,
+      "../../public/book_covers"
+    );
+
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    cb(null, uploadPath);
+  },
+
+  filename: (req, file, cb) => {
+    const uniqueId = uuidv4();
+    const extension = path.extname(file.originalname);
+
+    cb(null, `book-${uniqueId}${extension}`);
+  },
+});
+
+
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
@@ -51,22 +75,36 @@ const fileFilter = (
   }
 };
 
-
 const profileUpload = multer({
   storage: profileStorage,
-
   limits: {
-    fileSize: 2 * 1024 * 1024, // 2 MB
+    fileSize: 2 * 1024 * 1024,
   },
-
   fileFilter,
 });
 
+const bookUpload = multer({
+  storage: bookStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter,
+});
 
 export const uploads = {
   profile: {
-    single: (fieldName: string) => profileUpload.single(fieldName),
+    single: (fieldName: string) =>
+      profileUpload.single(fieldName),
+
     array: (fieldName: string, maxCount: number) =>
       profileUpload.array(fieldName, maxCount),
+  },
+
+  book: {
+    single: (fieldName: string) =>
+      bookUpload.single(fieldName),
+
+    array: (fieldName: string, maxCount: number) =>
+      bookUpload.array(fieldName, maxCount),
   },
 };

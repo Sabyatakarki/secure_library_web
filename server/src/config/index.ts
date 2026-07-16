@@ -10,7 +10,7 @@ export const PORT:number =
  //avoid exception if env is missing
 
  export const MONGO_URI:string =
- process.env.MONGO_URI || "mongodb://localhost:27017/Minigrocery_backend";
+ process.env.MONGO_URI || "mongodb://localhost:27017/securelibrary_backend";
 
 
  export const JWT_SECRET:string =

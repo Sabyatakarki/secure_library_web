@@ -5,11 +5,11 @@ export interface IUser extends Document {
   email: string;
   password: string;
 
-  studentId?: string;
+  studentId: string;
   phoneNumber: string;
 
-  department?: string;
-  semester?: number;
+  department: string;
+  semester: number;
   address?: string;
 
   profilePicture?: string;
@@ -18,6 +18,10 @@ export interface IUser extends Document {
 
   isVerified: boolean;
   isActive: boolean;
+
+  lastLogin?: Date;
+  failedLoginAttempts: number;
+  accountLocked: boolean;
 
   createdAt: Date;
   updatedAt: Date;
@@ -42,29 +46,38 @@ const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
+      minlength: 8,
     },
 
     studentId: {
       type: String,
+      required: true,
       unique: true,
-      sparse: true,
+      trim: true,
     },
 
     phoneNumber: {
       type: String,
       required: true,
+      trim: true,
     },
 
     department: {
       type: String,
+      required: true,
+      trim: true,
     },
 
     semester: {
       type: Number,
+      required: true,
+      min: 1,
+      max: 8,
     },
 
     address: {
       type: String,
+      default: "",
     },
 
     profilePicture: {
@@ -86,6 +99,20 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+
+    lastLogin: {
+      type: Date,
+    },
+
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+
+    accountLocked: {
+      type: Boolean,
+      default: false,
     },
   },
   {

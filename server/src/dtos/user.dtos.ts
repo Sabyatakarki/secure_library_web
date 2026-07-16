@@ -1,4 +1,3 @@
-
 export interface RegisterUserDto {
   fullName: string;
   email: string;
@@ -9,6 +8,7 @@ export interface RegisterUserDto {
   semester: number;
   address?: string;
   profilePicture?: string;
+  role?: "Student" | "Librarian";
 }
 
 export interface LoginUserDto {

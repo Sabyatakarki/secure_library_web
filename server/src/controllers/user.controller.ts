@@ -1,113 +1,244 @@
 import { Request, Response } from "express";
+import userService from "../services/user.service";
 
 class UserController {
-  
-  async getProfile(req: Request, res: Response): Promise<Response> {
+  // Register User
+  async register(req: Request, res: Response) {
     try {
-      return res.status(200).json({
+      const result = await userService.register(req.body);
+
+      return res.status(201).json({
         success: true,
-        message: "User profile fetched successfully.",
+        message: "User registered successfully.",
+        data: result,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
 
-  async updateProfile(req: Request, res: Response): Promise<Response> {
+  // Login User
+  async login(req: Request, res: Response) {
     try {
+      const result = await userService.login(req.body);
+
+    res.cookie("library_token", result.token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+return res.status(200).json({
+  success: true,
+  message: "Login successful.",
+  data: {
+    user: result.user,
+  },
+});
+    } catch (error: any) {
+      return res.status(error.statusCode || 400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Get Logged-in User Profile
+  async getProfile(req: Request, res: Response) {
+    try {
+      const result = await userService.getProfile(
+        (req.user as any)._id.toString()
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile fetched successfully.",
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(error.statusCode || 400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Update Profile
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const result = await userService.updateProfile(
+        (req.user as any)._id.toString(),
+        req.body
+      );
+
       return res.status(200).json({
         success: true,
         message: "Profile updated successfully.",
+        data: result,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
 
+  // Upload Profile Picture
   async uploadProfilePicture(
-    req: Request & { file?: { filename?: string } },
+    req: Request & { file?: Express.Multer.File },
     res: Response
-  ): Promise<Response> {
+  ) {
     try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Please upload a profile picture.",
+        });
+      }
+
+      const result = await userService.updateProfile(
+        (req.user as any)._id.toString(),
+        {
+          profilePicture: req.file.filename,
+        }
+      );
+
       return res.status(200).json({
         success: true,
         message: "Profile picture uploaded successfully.",
-        filename: req.file?.filename,
+        data: result,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
-      });
-    }
-  }
-  async deleteProfilePicture(
-    req: Request,
-    res: Response
-  ): Promise<Response> {
-    try {
-      return res.status(200).json({
-        success: true,
-        message: "Profile picture deleted successfully.",
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
 
   // Change Password
-  async changePassword(req: Request, res: Response): Promise<Response> {
+  async changePassword(req: Request, res: Response) {
     try {
+      const { currentPassword, newPassword } = req.body;
+
+      const result = await userService.changePassword(
+        (req.user as any)._id.toString(),
+        currentPassword,
+        newPassword
+      );
+
       return res.status(200).json({
         success: true,
-        message: "Password changed successfully.",
+        message: result.message,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
 
-  // Export User Data
-  async exportUserData(req: Request, res: Response): Promise<Response> {
+  // Get All Users
+  async getAllUsers(req: Request, res: Response) {
     try {
+      const result = await userService.getAllUsers();
+
       return res.status(200).json({
         success: true,
-        message: "User data exported successfully.",
+        data: result,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
 
   // Delete Account
-  async deleteAccount(req: Request, res: Response): Promise<Response> {
+  async deleteAccount(req: Request, res: Response) {
     try {
+      const result = await userService.deleteAccount(
+        (req.user as any)._id.toString()
+      );
+
       return res.status(200).json({
         success: true,
-        message: "User account deleted successfully.",
+        message: result.message,
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: error.message,
       });
     }
   }
+
+
+  // Send Reset Password Email
+async sendResetPasswordEmail(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+
+    const result = await userService.sendResetPasswordEmail(email);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+      message: "If the email is registered, a password reset link has been sent.",
+    });
+  } catch (error: any) {
+    return res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+// Reset Password
+async resetPassword(req: Request, res: Response) {
+  try {
+    const token = Array.isArray(req.params.token)
+      ? req.params.token[0]
+      : req.params.token;
+    const { newPassword } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reset token.",
+      });
+    }
+
+    await userService.resetPassword(token, newPassword);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully.",
+    });
+  } catch (error: any) {
+    return res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+  async logout(req: Request, res: Response) {
+  res.clearCookie("library_token");
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully.",
+  });
+}
+
 }
 
 export default new UserController();

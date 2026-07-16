@@ -20,26 +20,32 @@ export const authorizedMiddleware = async (
   try {
     let token: string | undefined;
 
-    const authHeader = req.headers.authorization;
+// 1. Check Authorization header
+const authHeader = req.headers.authorization;
 
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      token = authHeader.split(" ")[1];
-    }
+if (authHeader?.startsWith("Bearer ")) {
+  token = authHeader.split(" ")[1];
+}
+
+// 2. If no header, check cookie
+if (!token && req.cookies?.library_token) {
+  token = req.cookies.library_token;
+}
 
     if (!token) {
       throw new HttpError(401, "Unauthorized. Token missing.");
     }
 
     const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    ) as { id: string };
+  token,
+  process.env.JWT_SECRET as string
+) as { id: string };
 
-    if (!decoded?.id) {
-      throw new HttpError(401, "Invalid token.");
-    }
+if (!decoded?.id) {
+  throw new HttpError(401, "Invalid token.");
+}
 
-    const user = await userRepository.findById(decoded.id);
+const user = await userRepository.findById(decoded.id);
 
     if (!user) {
       throw new HttpError(401, "User not found.");

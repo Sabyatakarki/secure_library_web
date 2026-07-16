@@ -24,7 +24,7 @@ class UserRepository {
 
   // Get All Users
   async getAllUsers(): Promise<IUser[]> {
-    return await User.find();
+    return await User.find().select("-password");
   }
 
   // Update User
@@ -35,7 +35,7 @@ class UserRepository {
     return await User.findByIdAndUpdate(id, userData, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password");
   }
 
   // Update Profile Picture
@@ -47,7 +47,7 @@ class UserRepository {
       id,
       { profilePicture },
       { new: true }
-    );
+    ).select("-password");
   }
 
   // Update Password
@@ -60,6 +60,28 @@ class UserRepository {
       { password },
       { new: true }
     );
+  }
+
+  // Update Last Login
+  async updateLastLogin(id: string): Promise<void> {
+    await User.findByIdAndUpdate(id, {
+      lastLogin: new Date(),
+      failedLoginAttempts: 0,
+    });
+  }
+
+  // Increment Failed Login Attempts
+  async incrementFailedLogin(id: string): Promise<void> {
+    await User.findByIdAndUpdate(id, {
+      $inc: { failedLoginAttempts: 1 },
+    });
+  }
+
+  // Lock Account
+  async lockAccount(id: string): Promise<void> {
+    await User.findByIdAndUpdate(id, {
+      accountLocked: true,
+    });
   }
 
   // Delete User
