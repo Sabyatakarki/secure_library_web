@@ -99,15 +99,6 @@ export default function DashboardLayout({
       )
     },
     { 
-      label: "Notifications", 
-      href: "/dashboard/notifications", 
-      icon: (
-        <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-        </svg>
-      )
-    },
-    { 
       label: "Settings", 
       href: "/dashboard/settings", 
       icon: (
@@ -157,17 +148,7 @@ export default function DashboardLayout({
               );
             })}
           </nav>
-        </div>
-
-        {/* Dynamic Decorative Meta or Logout Block */}
-        <div className="border-t border-slate-100 pt-4 px-2">
-          <button className="flex items-center gap-3 w-full text-left text-xs font-bold uppercase tracking-wider text-rose-500 hover:text-rose-600 transition group">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 transition-transform group-hover:-translate-x-0.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-            </svg>
-            Sign Out Account
-          </button>
-        </div>
+        </div>        
       </aside>
 
       {/* Main Content Workspace */}

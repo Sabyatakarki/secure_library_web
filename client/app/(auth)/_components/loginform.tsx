@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import api from "../../../lib/api/axios";
+import { loginUser } from "../../../lib/actions/auth-actions";
 
 
 export default function LoginForm() {
@@ -52,25 +52,26 @@ export default function LoginForm() {
     setSuccessMessage("");
 
     try {
-      const response = await api.post(
-  "/users/login",
-  formData,
-  {
-    withCredentials: true,
-  }
-);
+      const response = await loginUser(formData);
 
-if (!response.data.success) {
-  setErrorMessage("Invalid email or password.");
+if (!response.success) {
+  setErrorMessage(response.message);
   setLoading(false);
   return;
 }
 
-      setSuccessMessage("Welcome back! Login successful.");
+const user = response.data;
+    
 
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 3000);
+ setSuccessMessage("Welcome back! Login successful.");
+
+setTimeout(() => {
+  if (user.role === "Admin") {
+    router.push("/admin/dashboard");
+  } else {
+    router.push("/dashboard");
+  }
+}, 3000);
 
     } catch (error) {
       console.error(error);

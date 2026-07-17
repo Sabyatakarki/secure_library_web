@@ -60,6 +60,18 @@ export async function loginUser(loginData: any) {
 
 // Logout
 export async function logoutUser() {
+  try {
+    await axios.post(
+      `${API_URL}/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+  } catch (error) {
+    console.error(error);
+  }
+
   await clearAuthCookies();
 
   return {
