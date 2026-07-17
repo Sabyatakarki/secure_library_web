@@ -6,8 +6,7 @@ import bookRoutes from "./routes/book.routes";
 import userRoutes from "./routes/user.routes";
 import reservationRoutes from "./routes/reservation.routes";
 import rentalRoutes from "./routes/rental.routes";
-
-
+import adminRoutes from "./routes/admin/admin.routes";
 
 const app = express();
 
@@ -47,5 +46,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/rentals", rentalRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 export default app;
