@@ -1,28 +1,83 @@
 import { Router } from "express";
-import adminReservationController from "../../controllers/admin/adminReservation.controller";
 import { authorizedMiddleware } from "../../middleware/auth.middlware";
+
+import { AdminUserController } from "../../controllers/admin/adminUser.controller";
+import adminReservationController from "../../controllers/admin/adminReservation.controller";
+
+import { uploads } from "../../middleware/upload.middlware";
+
 
 const router = Router();
 
-// Get all reservations
+const adminUserController = new AdminUserController();
+
+
+// Authentication for all admin routes
+router.use(authorizedMiddleware);
+
+
+// ======================
+// ADMIN USER MANAGEMENT
+// ======================
+
+router.post(
+  "/users",
+  uploads.profile.single("image"),
+  adminUserController.createUser
+);
+
+
+router.get(
+  "/users",
+  adminUserController.getAllUsers
+);
+
+
+router.get(
+  "/users/:id",
+  adminUserController.getUserById
+);
+
+
+router.put(
+  "/users/:id",
+  uploads.profile.single("image"),
+  adminUserController.updateUser
+);
+
+
+router.delete(
+  "/users/:id",
+  adminUserController.deleteUser
+);
+
+
+
+// ======================
+// ADMIN RESERVATIONS
+// ======================
+
+
+// Get all student reservations
 router.get(
   "/reservations",
-  authorizedMiddleware,
   adminReservationController.getAllReservations
 );
+
 
 // Approve reservation
 router.put(
   "/reservations/approve/:reservationId",
-  authorizedMiddleware,
   adminReservationController.approveReservation
 );
 
-// Cancel reservation
+
+// Reject/Cancel reservation
 router.put(
   "/reservations/cancel/:reservationId",
-  authorizedMiddleware,
   adminReservationController.cancelReservation
 );
+
+
 
 export default router;

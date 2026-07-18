@@ -1,28 +1,41 @@
 import Reservation from "../models/reservation.model";
 import Book from "../models/book.model";
+import Rental from "../models/rental.model";
 import { HttpError } from "../error/http-error";
 
 class ReservationService {
-  // Reserve a Book
   async reserveBook(userId: string, bookId: string) {
-    // Check if the book exists
+
     const book = await Book.findById(bookId);
 
     if (!book) {
-      throw new HttpError(404, "Book not found.");
+      throw new HttpError(
+        404,
+        "Book not found."
+      );
     }
 
-    // Check availability
+
     if (book.availableCopies <= 0) {
-      throw new HttpError(400, "Book is not available.");
+      throw new HttpError(
+        400,
+        "Book is not available."
+      );
     }
 
-    // Check if student already reserved this book
-    const existingReservation = await Reservation.findOne({
-      user: userId,
-      book: bookId,
-      status: { $in: ["Pending", "Approved"] },
-    });
+
+    const existingReservation =
+      await Reservation.findOne({
+        user: userId,
+        book: bookId,
+        status: {
+          $in: [
+            "Pending",
+            "Approved"
+          ]
+        },
+      });
+
 
     if (existingReservation) {
       throw new HttpError(
@@ -31,74 +44,287 @@ class ReservationService {
       );
     }
 
-    // Create reservation
-    const reservation = await Reservation.create({
-      user: userId,
-      book: bookId,
-    });
 
-    // Reduce available copies
+
+    const reservation =
+      await Reservation.create({
+        user: userId,
+        book: bookId,
+      });
+
+
+
+    // Hold one copy for reservation
     book.availableCopies -= 1;
 
-    // Update status automatically
+
     if (book.availableCopies === 0) {
       book.status = "Unavailable";
     }
 
+
     await book.save();
+
 
     return reservation;
   }
 
-  // Get Logged-in Student Reservations
-  async getMyReservations(userId: string) {
-    return await Reservation.find({
-      user: userId,
-    })
-      .populate("book")
-      .sort({ createdAt: -1 });
-  }
+  async getMyReservations(userId:string){
 
-  // Cancel Reservation
-  async cancelReservation(
-    reservationId: string,
-    userId: string
-  ) {
-    const reservation = await Reservation.findOne({
-      _id: reservationId,
-      user: userId,
+    return await Reservation.find({
+      user:userId,
+    })
+    .populate("book")
+    .sort({
+      createdAt:-1
     });
 
-    if (!reservation) {
+  }
+
+  async cancelReservation(
+    reservationId:string,
+    userId:string
+  ){
+
+    const reservation =
+      await Reservation.findOne({
+        _id:reservationId,
+        user:userId,
+      });
+
+
+
+    if(!reservation){
+
       throw new HttpError(
         404,
         "Reservation not found."
       );
+
     }
 
-    if (reservation.status === "Cancelled") {
+
+
+    // Student can cancel only pending
+    if(reservation.status !== "Pending"){
+
       throw new HttpError(
         400,
-        "Reservation already cancelled."
+        "Only pending reservations can be cancelled."
       );
+
     }
 
-    reservation.status = "Cancelled";
+
+
+    reservation.status="Cancelled";
+
     await reservation.save();
 
-    // Restore available copies
-    const book = await Book.findById(reservation.book);
 
-    if (book) {
+
+    // Restore book copy
+
+    const book =
+      await Book.findById(
+        reservation.book
+      );
+
+
+    if(book){
+
       book.availableCopies += 1;
-      book.status = "Available";
+
+      book.status="Available";
+
       await book.save();
+
     }
 
+
+
     return {
-      message: "Reservation cancelled successfully.",
+      message:
+      "Reservation cancelled successfully."
     };
+
   }
+
+//Admin
+  async getAllReservations(){
+
+    return await Reservation.find()
+      .populate(
+        "user",
+        "fullName email studentId"
+      )
+      .populate(
+        "book",
+        "title author isbn"
+      )
+      .sort({
+        createdAt:-1
+      });
+
+  }
+  async approveReservation(
+    reservationId:string,
+    librarianId:string
+  ){
+
+
+    const reservation =
+      await Reservation.findById(
+        reservationId
+      );
+
+
+
+    if(!reservation){
+
+      throw new HttpError(
+        404,
+        "Reservation not found."
+      );
+
+    }
+
+
+
+    if(reservation.status !== "Pending"){
+
+      throw new HttpError(
+        400,
+        "Reservation already processed."
+      );
+
+    }
+
+
+
+    reservation.status="Approved";
+
+    reservation.approvedBy =
+      librarianId as any;
+
+
+
+    await reservation.save();
+
+
+
+
+    // Create rental automatically
+
+    const dueDate = new Date();
+
+    dueDate.setDate(
+      dueDate.getDate()+14
+    );
+
+
+
+    const rental =
+      await Rental.create({
+
+        user:
+          reservation.user,
+
+
+        book:
+          reservation.book,
+
+
+        reservation:
+          reservation._id,
+
+
+        dueDate,
+
+
+        status:
+          "Borrowed"
+
+      });
+
+
+
+    return rental;
+
+  }
+
+  async adminCancelReservation(
+    reservationId:string
+  ){
+
+
+    const reservation =
+      await Reservation.findById(
+        reservationId
+      );
+
+
+
+    if(!reservation){
+
+      throw new HttpError(
+        404,
+        "Reservation not found."
+      );
+
+    }
+
+
+
+    if(reservation.status !== "Pending"){
+
+      throw new HttpError(
+        400,
+        "Only pending reservations can be cancelled."
+      );
+
+    }
+
+
+
+    reservation.status="Cancelled";
+
+
+    await reservation.save();
+
+
+
+
+    // Return book copy
+
+    const book =
+      await Book.findById(
+        reservation.book
+      );
+
+
+    if(book){
+
+      book.availableCopies += 1;
+
+      book.status="Available";
+
+
+      await book.save();
+
+    }
+
+
+
+    return {
+      message:
+      "Reservation cancelled by librarian."
+    };
+
+  }
+
+
 }
+
 
 export default new ReservationService();

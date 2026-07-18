@@ -1,4 +1,5 @@
 export const API = {
+
   AUTH: {
     REGISTER: "/users/register",
     LOGIN: "/users/login",
@@ -15,32 +16,52 @@ export const API = {
       `/users/reset-password/${token}`,
   },
 
+
   USER: {
     PROFILE_PICTURE: "/users/profile-picture",
     DELETE_ACCOUNT: "/users/delete-account",
   },
 
+
   BOOK: {
     GET_ALL: "/books",
-    GET_BY_ID: (id: string) => `/books/${id}`,
+    GET_BY_ID: (id: string) =>
+      `/books/${id}`,
     SEARCH: "/books/search",
   },
 
+
   RESERVATION: {
     CREATE: "/reservations",
-    GET_ALL: "/reservations",
-    CANCEL: (id: string) => `/reservations/${id}`,
+    MY_RESERVATIONS: "/reservations/my",
+    CANCEL: (id: string) =>
+      `/reservations/${id}`,
   },
+
 
   RENTAL: {
     BORROW: "/rentals",
     MY_RENTALS: "/rentals/my",
-    RETURN_BOOK: (id: string) => `/rentals/return/${id}`,
+    RETURN_BOOK: (id: string) =>
+      `/rentals/return/${id}`,
   },
 
-  LIBRARIAN: {
-    DASHBOARD: "/librarian/dashboard",
-    STUDENTS: "/librarian/students",
-    BOOKS: "/librarian/books",
-  },
+ADMIN: {
+    USERS: {
+
+        CREATE: "/admin/users",
+
+        GET_ALL: "/admin/users",
+
+        GET_BY_ID: (id:string) =>
+            `/admin/users/${id}`,
+
+        UPDATE: (id:string) =>
+            `/admin/users/${id}`,
+
+        DELETE: (id:string) =>
+            `/admin/users/${id}`,
+    }
+}
+
 };

@@ -42,7 +42,9 @@ class RentalService {
       dueDate,
     });
 
-    return rental;
+    return await Rental.findById(rental._id)
+.populate("book")
+.populate("user");
   }
 
   // Get Logged-in Student Rentals

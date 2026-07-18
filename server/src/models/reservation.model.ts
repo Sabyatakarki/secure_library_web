@@ -8,6 +8,8 @@ export interface IReservation extends Document {
 
   status: "Pending" | "Approved" | "Cancelled";
 
+  approvedBy?: Types.ObjectId;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +38,11 @@ const ReservationSchema = new Schema<IReservation>(
       enum: ["Pending", "Approved", "Cancelled"],
       default: "Pending",
     },
+
+    approvedBy: {
+  type: Schema.Types.ObjectId,
+  ref: "User",
+}
   },
   {
     timestamps: true,

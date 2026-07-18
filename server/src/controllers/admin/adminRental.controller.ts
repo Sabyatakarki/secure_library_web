@@ -28,9 +28,11 @@ class AdminReservationController {
         ? req.params.reservationId[0]
         : req.params.reservationId;
 
-      const result = await adminReservationService.approveReservation(
-        String(reservationId)
-      );
+      const result =
+await adminReservationService.approveReservation(
+  String(reservationId),
+  req.user!._id.toString()
+);
 
       return res.status(200).json({
         success: true,
@@ -47,18 +49,51 @@ class AdminReservationController {
 
   // Reject Reservation
   async rejectReservation(req: Request, res: Response) {
+  try {
+
+    const reservationId =
+      req.params.reservationId as string;
+
+
+    const result =
+      await adminReservationService.cancelReservation(
+        reservationId
+      );
+
+
+    return res.status(200).json({
+      success:true,
+      message:"Reservation rejected successfully.",
+      data:result
+    });
+
+
+  } catch(error:any){
+
+    return res.status(
+      error.statusCode || 400
+    ).json({
+      success:false,
+      message:error.message
+    });
+
+  }
+}
+
+  // Cancel Reservation
+  async cancelReservation(req: Request, res: Response) {
     try {
       const reservationId = Array.isArray(req.params.reservationId)
         ? req.params.reservationId[0]
         : req.params.reservationId;
 
-      const result = await (adminReservationService as any).rejectReservation(
+      const result = await adminReservationService.cancelReservation(
         String(reservationId)
       );
 
       return res.status(200).json({
         success: true,
-        message: "Reservation rejected successfully.",
+        message: "Reservation cancelled successfully.",
         data: result,
       });
     } catch (error: any) {

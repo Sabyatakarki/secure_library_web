@@ -10,15 +10,15 @@ const menuItems = [
   },
   {
     title: "Books",
-    href: "/admin/books",
+    href: "/admin/dashboard/books",
   },
   {
     title: "Reservations",
-    href: "/admin/reservations",
+    href: "/admin/dashboard/reservations",
   },
   {
     title: "Rentals",
-    href: "/admin/rentals",
+    href: "/admin/dashboard/rentals",
   },
 ];
 

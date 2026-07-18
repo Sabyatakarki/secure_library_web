@@ -4,25 +4,21 @@ import { authorizedMiddleware } from "../middleware/auth.middlware";
 
 const router = Router();
 
-// Create Rental
-router.post(
-  "/:reservationId",
-  authorizedMiddleware,
-  rentalController.createRental
-);
 
-// Logged-in Student Rentals
+// Student: Get My Rentals
 router.get(
-  "/my-rentals",
+  "/my",
   authorizedMiddleware,
   rentalController.getMyRentals
 );
 
-// Return Book
+
+// Student: Return Book
 router.put(
   "/return/:rentalId",
   authorizedMiddleware,
   rentalController.returnBook
 );
+
 
 export default router;

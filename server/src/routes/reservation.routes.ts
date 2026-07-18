@@ -4,25 +4,29 @@ import { authorizedMiddleware } from "../middleware/auth.middlware";
 
 const router = Router();
 
-// Reserve a Book
+
+// Student: Get own reservations
+router.get(
+  "/my",
+  authorizedMiddleware,
+  reservationController.getMyRentals
+);
+
+
+// Student: Reserve book
 router.post(
   "/:bookId",
   authorizedMiddleware,
-  reservationController.reserveBook
+  reservationController.getMyRentals
 );
 
-// Get Logged-in Student Reservations
-router.get(
-  "/my-reservations",
-  authorizedMiddleware,
-  reservationController.getMyReservations
-);
 
-// Cancel Reservation
+// Student: Cancel reservation
 router.put(
   "/cancel/:reservationId",
   authorizedMiddleware,
-  reservationController.cancelReservation
+  reservationController.getMyRentals
 );
+
 
 export default router;
