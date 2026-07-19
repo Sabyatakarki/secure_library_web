@@ -14,7 +14,7 @@ export interface IUser extends Document {
 
   profilePicture?: string;
 
-  role: "Student" | "Librarian";
+  role: "Student" | "Admin";
 
   isVerified: boolean;
   isActive: boolean;
@@ -22,6 +22,7 @@ export interface IUser extends Document {
   lastLogin?: Date;
   failedLoginAttempts: number;
   accountLocked: boolean;
+  lockUntil?: Date | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -87,7 +88,7 @@ const UserSchema = new Schema<IUser>(
 
     role: {
       type: String,
-      enum: ["Student", "Librarian"],
+      enum: ["Student", "Admin"],
       default: "Student",
     },
 
@@ -109,6 +110,10 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       default: 0,
     },
+    lockUntil: {
+  type: Date,
+  default: null,
+},
 
     accountLocked: {
       type: Boolean,

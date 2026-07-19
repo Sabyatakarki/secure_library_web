@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { loginUser } from "../../../lib/actions/auth-actions";
-
 
 export default function LoginForm() {
   const router = useRouter();
@@ -22,6 +21,33 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [countdown, setCountdown] = useState(3);
 
+  // Security Verification State Variables
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [captchaQuestion, setCaptchaQuestion] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaResult, setCaptchaResult] = useState(0);
+
+  // Dynamic Multi-Operator CAPTCHA Generator
+  const generateCaptcha = useCallback(() => {
+    const operators = ["+", "-"];
+    const selectedOperator = operators[Math.floor(Math.random() * operators.length)];
+    
+    let num1 = Math.floor(Math.random() * 10) + 1;
+    let num2 = Math.floor(Math.random() * 10) + 1;
+
+    // Ensure subtraction doesn't result in confusing negative numbers for users
+    if (selectedOperator === "-" && num1 < num2) {
+      const temp = num1;
+      num1 = num2;
+      num2 = temp;
+    }
+
+    setCaptchaQuestion(`${num1} ${selectedOperator} ${num2}`);
+    setCaptchaResult(selectedOperator === "+" ? num1 + num2 : num1 - num2);
+    setCaptchaAnswer("");
+  }, []);
+
+  // Sync Timer for Successful Redirect Loops
   useEffect(() => {
     if (!successMessage) return;
     const timer = setInterval(() => {
@@ -40,10 +66,19 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check custom strength configuration rules before hitting backend
+    // Verify CAPTCHA validation before contacting backend vectors (Triggered after 3 failed database hits)
+    if (failedAttempts >= 3) {
+      if (Number(captchaAnswer) !== captchaResult) {
+        setErrorMessage("Incorrect CAPTCHA answer. Please try again.");
+        generateCaptcha();
+        return;
+      }
+    }
+
+    // Client-side regex password validation (Does not count toward attack/failure metrics)
     const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
     if (!passRegex.test(formData.password)) {
-      setErrorMessage("Invalid email or password.");
+      setErrorMessage("Password must contain uppercase, lowercase, number and special character.");
       return;
     }
 
@@ -54,24 +89,44 @@ export default function LoginForm() {
     try {
       const response = await loginUser(formData);
 
-if (!response.success) {
-  setErrorMessage(response.message);
-  setLoading(false);
-  return;
-}
+      if (!response.success) {
+        // Handle server-enforced account lockouts cleanly without incrementing local failure count
+        if (response.message?.includes("Account is locked")) {
+          setErrorMessage(response.message);
+          setLoading(false);
+          return;
+        }
 
-const user = response.data;
-    
+        const attempts = failedAttempts + 1;
+        setFailedAttempts(attempts);
 
- setSuccessMessage("Welcome back! Login successful.");
+        // Turn on mathematical verification wall if threshold met
+        if (attempts >= 3 && captchaQuestion === "") {
+          generateCaptcha();
+        }
 
-setTimeout(() => {
-  if (user.role === "Admin") {
-    router.push("/admin/dashboard");
-  } else {
-    router.push("/dashboard");
-  }
-}, 3000);
+        setErrorMessage(response.message);
+        setLoading(false);
+        return;
+      }
+
+      const user = response.data;
+      
+      // Reset CAPTCHA and local memory metrics upon clean passport entry
+      setFailedAttempts(0);
+      setCaptchaQuestion("");
+      setCaptchaAnswer("");
+
+      setSuccessMessage("Welcome back! Login successful.");
+      setLoading(false); // Instantly clears loading state while redirect countdown runs
+
+      setTimeout(() => {
+        if (user.role === "Admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 3000);
 
     } catch (error) {
       console.error(error);
@@ -92,7 +147,7 @@ setTimeout(() => {
           </div>
 
           {successMessage && (
-            <div className="mb-6 p-4 bg-emerald-50/60 backdrop-blur-sm border border-emerald-100 text-emerald-900 rounded-2xl text-sm flex items-center gap-3 shadow-sm animate-fade-in animate-duration-200">
+            <div className="mb-6 p-4 bg-emerald-50/60 backdrop-blur-sm border border-emerald-100 text-emerald-900 rounded-2xl text-sm flex items-center gap-3 shadow-sm">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white font-bold text-xs shrink-0">✓</span>
               <div className="flex flex-col">
                 <span className="font-semibold text-emerald-800">{successMessage}</span>
@@ -136,7 +191,12 @@ setTimeout(() => {
                   required
                   disabled={loading || !!successMessage}
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 text-slate-400 hover:text-slate-600 transition outline-none" disabled={loading || !!successMessage}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-4 text-slate-400 hover:text-slate-600 transition outline-none" 
+                  disabled={loading || !!successMessage}
+                >
                   {showPassword ? (
                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 opacity-70"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 1-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
                   ) : (
@@ -146,6 +206,35 @@ setTimeout(() => {
               </div>
             </div>
 
+            {/* Implemented Professional Yellow Security Warning & Randomized Operator CAPTCHA */}
+            {failedAttempts >= 3 && (
+              <div className="space-y-3 p-4 bg-amber-50/80 border border-amber-200 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                <div>
+                  <p className="font-bold text-amber-800 text-sm">
+                    Too many failed login attempts.
+                  </p>
+                  <p className="text-xs text-amber-600/90 font-medium mt-0.5">
+                    Please complete the security verification below to continue.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="px-4 py-2.5 rounded-xl bg-white border border-amber-200 font-black text-slate-800 text-base select-none tracking-tight shadow-2xs">
+                    {captchaQuestion} = ?
+                  </div>
+                  <input
+                    type="number"
+                    value={captchaAnswer}
+                    onChange={(e) => setCaptchaAnswer(e.target.value)}
+                    placeholder="Answer"
+                    className="w-full sm:w-28 bg-white border border-slate-200 focus:border-amber-500 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 outline-none transition focus:ring-4 focus:ring-amber-500/10"
+                    required
+                    disabled={loading || !!successMessage}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between text-sm select-none pt-1">
               <label className="flex items-center gap-2.5 text-slate-600 font-medium cursor-pointer group">
                 <input
@@ -153,7 +242,7 @@ setTimeout(() => {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   disabled={loading || !!successMessage}
-                  className="w-4.5 h-4.5 text-blue-600 border-slate-300 rounded-lg focus:ring-blue-500/20 cursor-pointer transition accent-blue-600 rounded"
+                  className="w-4.5 h-4.5 text-blue-600 border-slate-300 rounded-lg focus:ring-blue-500/20 cursor-pointer transition accent-blue-600"
                 />
                 <span className="text-slate-500 group-hover:text-slate-800 transition duration-150">Remember Me</span>
               </label>
@@ -170,7 +259,7 @@ setTimeout(() => {
               <button
                 type="submit"
                 disabled={loading || !!successMessage}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3.5 rounded-2xl text-sm font-bold tracking-wide shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all duration-200 active:scale-[0.99] disabled:from-slate-300 disabled:to-slate-300 disabled:shadow-none disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3.5 rounded-2xl text-sm font-bold tracking-wide shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all duration-200 active:scale-[0.99] disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed"
               >
                 {loading ? "Verifying Credentials..." : "Sign In to System"}
               </button>

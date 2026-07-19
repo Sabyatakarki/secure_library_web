@@ -2,7 +2,12 @@
 
 import { register, login, whoami, updateProfile,resetPassword, requestPasswordReset  } from "../auth";
 import axios from "axios";
-import { setUserData, clearAuthCookies } from "../cookies";
+import {
+  setUserData,
+  setLibraryToken,
+  clearAuthCookies,
+} from "../cookies";
+
 
 const API_URL = "http://localhost:5050/api/users";
 
@@ -42,13 +47,15 @@ export async function loginUser(loginData: any) {
     );
 
     const user = response.data.data.user;
+const token = response.data.data.token;
 
-    await setUserData(user);
+await setUserData(user);
+await setLibraryToken(token);
 
-    return {
-      success: true,
-      data: user,
-    };
+return {
+  success: true,
+  data: user,
+};
   } catch (error: any) {
     return {
       success: false,

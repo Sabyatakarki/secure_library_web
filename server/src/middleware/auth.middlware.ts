@@ -56,11 +56,11 @@ export const authorizedMiddleware = async (
     // Protect Admin Routes
     if (
       req.originalUrl.startsWith("/api/admin") &&
-      user.role !== "Librarian"
+      user.role !== "Admin"
     ) {
       throw new HttpError(
         403,
-        "Access denied. Librarian only."
+        "Access denied. Admin only."
       );
     }
 

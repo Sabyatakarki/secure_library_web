@@ -9,7 +9,7 @@ const router = Router();
 router.get(
   "/my",
   authorizedMiddleware,
-  reservationController.getMyRentals
+  reservationController.getMyReservations
 );
 
 
@@ -17,7 +17,7 @@ router.get(
 router.post(
   "/:bookId",
   authorizedMiddleware,
-  reservationController.getMyRentals
+  reservationController.reserveBook
 );
 
 
@@ -25,7 +25,7 @@ router.post(
 router.put(
   "/cancel/:reservationId",
   authorizedMiddleware,
-  reservationController.getMyRentals
+  reservationController.cancelReservation
 );
 
 

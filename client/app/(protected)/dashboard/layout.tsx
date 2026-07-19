@@ -22,7 +22,7 @@ export default function DashboardLayout({
   useEffect(() => {
     async function fetchUserProfile() {
       try {
-        const response = await fetch("/api/user/profile"); // Adjust this route to match your exact backend endpoint
+        const response = await fetch("/api/user/profile"); 
         if (response.ok) {
           const data = await response.json();
           setUser({
@@ -30,7 +30,6 @@ export default function DashboardLayout({
             role: data.role || "Active Member",
           });
         } else {
-          // Graceful configuration fallback if server handshake fails
           setUser({ fullName: "Welcome Student", role: "Active Member" });
         }
       } catch (error) {
@@ -43,7 +42,6 @@ export default function DashboardLayout({
     fetchUserProfile();
   }, []);
 
-  // Safe helper utility to generate visual UI initials out of string words
   const getInitials = (name: string) => {
     const parts = name.split(" ");
     if (parts.length >= 2) {
@@ -111,17 +109,17 @@ export default function DashboardLayout({
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans antialiased text-slate-800">
+    <div className="flex h-screen w-screen max-h-screen max-w-full overflow-hidden bg-slate-50 font-sans antialiased text-slate-800">
       
-      {/* Sidebar Container */}
-      <aside className="w-64 border-r border-slate-200 bg-white p-6 flex flex-col justify-between hidden md:flex shrink-0">
+      {/* Updated Sidebar: Transformed to deep navy/slate bg-slate-900 */}
+      <aside className="w-64 border-r border-slate-800 bg-slate-900 p-6 hidden md:flex flex-col justify-between shrink-0 h-full overflow-y-auto shadow-xl">
         <div>
           {/* Brand/Logo Zone */}
           <div className="flex items-center gap-2.5 mb-8 px-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-black tracking-tighter text-base text-white shadow-sm shadow-blue-500/20">
+            <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center font-black tracking-tighter text-base text-white shadow-md shadow-blue-500/20">
               L
             </div>
-            <span className="font-extrabold text-xs uppercase tracking-widest text-slate-900">
+            <span className="font-extrabold text-xs uppercase tracking-widest text-slate-100">
               Secure Library
             </span>
           </div>
@@ -136,11 +134,11 @@ export default function DashboardLayout({
                   href={item.href}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-150 group ${
                     isActive
-                      ? "bg-blue-50 text-blue-600 shadow-sm shadow-blue-500/5"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
                   }`}
                 >
-                  <span className={`transition-transform group-hover:scale-105 ${isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}>
+                  <span className={`transition-transform group-hover:scale-105 ${isActive ? "opacity-100 text-white" : "opacity-70 text-slate-400 group-hover:opacity-100 group-hover:text-slate-100"}`}>
                     {item.icon}
                   </span>
                   {item.label}
@@ -151,18 +149,18 @@ export default function DashboardLayout({
         </div>        
       </aside>
 
-      {/* Main Content Workspace */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Content Workspace Layout Viewport Frame */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
-        {/* Modern Navbar Header */}
-        <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 sm:px-8 z-10 shadow-sm shadow-slate-100">
+        {/* Modern Navbar Header Panel */}
+        <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 sm:px-8 shrink-0 z-10 shadow-sm shadow-slate-100">
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight sm:text-lg">
               Student Dashboard
             </h2>
           </div>
 
-          {/* Interactive User Profile Widget Block */}
+          {/* User Profile Widget Block */}
           <div className="flex items-center gap-4">
             <Link 
               href="/dashboard/profile" 
@@ -173,7 +171,6 @@ export default function DashboardLayout({
               }`}
             >
               {isLoading ? (
-                // Shimmer layout loader block configuration
                 <div className="flex items-center gap-3 animate-pulse">
                   <div className="w-7 h-7 rounded-full bg-slate-200" />
                   <div className="hidden sm:flex flex-col gap-1">
@@ -201,7 +198,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Main Fluid Content Layout Area */}
-        <main className="p-6 sm:p-8 flex-1 overflow-y-auto">
+        <main className="p-6 sm:p-8 flex-1 overflow-y-auto min-h-0">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

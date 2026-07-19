@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// Integrated your baseline absolute path Axios network instance
+import { useRouter } from "next/navigation";
 import api from "../../../lib/api/axios";
-
-// TypeScript declarations updated to reflect MongoDB _id structures
 interface Book {
   _id: string;
   title: string;
@@ -18,7 +16,6 @@ interface Reservation {
   bookId: string;
   status: "Pending" | "Approved" | "Rejected";
   createdAt: string;
-  // Accounts for both fully populated objects or standard raw fallback ID strings
   book?: string | {
     title: string;
   };
@@ -28,13 +25,14 @@ interface Rental {
   _id: string;
   bookId: string;
   dueDate: string;
-  // Accounts for both fully populated objects or standard raw fallback ID strings
   book?: string | {
     title: string;
   };
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   // Application Data States
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -43,41 +41,24 @@ export default function DashboardPage() {
   // UX State Indicators
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
-  // Synchronized parallel lifestyle Axios fetch queries
   useEffect(() => {
     async function loadDashboardMetrics() {
       try {
         setIsLoading(true);
         setHasError(false);
+        const [booksRes, rentalsRes, reservationsRes] = await Promise.all([
+          api.get("/books"),
+          api.get("/rentals/my"),
+          api.get("/reservations/my"),
+        ]);
 
-        // Problem 1 Fix: Implemented your custom configured Axios cluster layer 
-       try {
-  const booksRes = await api.get("/books");
-  console.log("✅ Books:", booksRes.data);
-} catch (err: any) {
-  console.log("❌ Books");
-  console.log(err.response?.status);
-  console.log(err.response?.data);
-}
+        const rawBooks = booksRes.data?.data !== undefined ? booksRes.data.data : booksRes.data;
+        const rawRentals = rentalsRes.data?.data !== undefined ? rentalsRes.data.data : rentalsRes.data;
+        const rawReservations = reservationsRes.data?.data !== undefined ? reservationsRes.data.data : reservationsRes.data;
 
-try {
-  const rentalsRes = await api.get("/rentals/my-rentals");
-  console.log("✅ Rentals:", rentalsRes.data);
-} catch (err: any) {
-  console.log("❌ Rentals");
-  console.log(err.response?.status);
-  console.log(err.response?.data);
-}
-
-try {
-  const reservationsRes = await api.get("/reservations/my-reservations");
-  console.log("✅ Reservations:", reservationsRes.data);
-} catch (err: any) {
-  console.log("❌ Reservations");
-  console.log(err.response?.status);
-  console.log(err.response?.data);
-}
+        setBooks(Array.isArray(rawBooks) ? rawBooks : []);
+        setRentals(Array.isArray(rawRentals) ? rawRentals : []);
+        setReservations(Array.isArray(rawReservations) ? rawReservations : []);
 
       } catch (err) {
         console.error("Dashboard Axios backend syncing failure stack trace:", err);
@@ -89,18 +70,15 @@ try {
 
     loadDashboardMetrics();
   }, []);
-
-  // Compute calculated reactive properties out of sync data vectors
   const borrowedCount = rentals.length;
   const reservedCount = reservations.length;
   const availableCount = books.length; 
   const pendingCount = reservations.filter(r => r.status === "Pending").length;
-
-  // Configuration metrics collection mapping grid positions
   const stats = [
     {
       label: "Borrowed Books",
       value: borrowedCount,
+      path: "/dashboard/rentals",
       icon: (
         <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-blue-600">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
@@ -111,6 +89,7 @@ try {
     {
       label: "Reserved Books",
       value: reservedCount,
+      path: "/dashboard/reservations",
       icon: (
         <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-amber-600">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
@@ -121,6 +100,7 @@ try {
     {
       label: "Available Books",
       value: availableCount,
+      path: "/dashboard/books",
       icon: (
         <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-emerald-600">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -131,6 +111,7 @@ try {
     {
       label: "Pending Reservations",
       value: pendingCount,
+      path: "/dashboard/reservations",
       icon: (
         <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-rose-600">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -156,7 +137,7 @@ try {
     if (bookProperty && typeof bookProperty === "object" && "title" in bookProperty) {
       return bookProperty.title;
     }
-    return "Book Document"; // Smart clean fallback if Mongoose .populate() hasn't run yet
+    return "Book Document"; 
   };
 
   // Component reusable utility context for pristine empty states
@@ -175,7 +156,7 @@ try {
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Welcome Branding Hero Title Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 sm:p-8 rounded-3xl text-white shadow-md shadow-blue-500/10 relative overflow-hidden">
+      <section className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden border border-slate-800">
         <div className="absolute right-0 top-0 opacity-10 translate-x-12 -translate-y-6 pointer-events-none scale-150">
           <svg width="200" height="200" fill="currentColor" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>
         </div>
@@ -183,7 +164,7 @@ try {
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
           Welcome to Secure Smart Library
         </h1>
-        <p className="text-blue-100 text-xs sm:text-sm font-medium mt-2 max-w-2xl leading-relaxed">
+        <p className="text-slate-400 text-xs sm:text-sm font-medium mt-2 max-w-2xl leading-relaxed">
           Manage your live book rentals, system space status counters, active reservations, and real-time security parameters from your unified sync dashboard space.
         </p>
       </section>
@@ -203,7 +184,8 @@ try {
         {stats.map((stat, idx) => (
           <div 
             key={idx} 
-            className="border border-slate-200/80 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md hover:border-slate-300/80 transition-all duration-200 flex items-center justify-between group"
+            onClick={() => router.push(stat.path)}
+            className="border border-slate-200/80 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md hover:border-slate-300/80 transition-all duration-200 flex items-center justify-between group cursor-pointer"
           >
             <div className="space-y-1">
               <h2 className="text-slate-400 text-xs font-bold uppercase tracking-wider">
@@ -212,7 +194,7 @@ try {
               {isLoading ? (
                 <div className="h-8 w-12 bg-slate-200 animate-pulse rounded-lg mt-1" />
               ) : (
-                <p className="text-3xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                <p className="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
                   {stat.value}
                 </p>
               )}
@@ -232,11 +214,19 @@ try {
           
           {/* Recent Activity Card Block */}
           <section className="border border-slate-200/80 rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-slate-50 pb-3">
-              <div className="w-1.5 h-4 bg-blue-600 rounded-full" />
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Recent Activity
-              </h2>
+            <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-indigo-950 rounded-full" />
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                  Recent Activity
+                </h2>
+              </div>
+              <button 
+                onClick={() => router.push("/dashboard/reservations")} 
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
+              >
+                View All
+              </button>
             </div>
 
             {isLoading ? (
@@ -250,7 +240,6 @@ try {
               <div className="flow-root">
                 <ul className="-mb-8">
                   {reservations.slice(0, 5).map((log, logIdx) => (
-                    // Problem 2 Fix: Track maps reassigned from log.id to log._id
                     <li key={log._id}>
                       <div className="relative pb-6">
                         {logIdx !== Math.min(reservations.length, 5) - 1 ? (
@@ -294,11 +283,19 @@ try {
 
           {/* Featured Books Grid Block */}
           <section className="border border-slate-200/80 rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-slate-50 pb-3">
-              <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Featured New Additions
-              </h2>
+            <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-indigo-900 rounded-full" />
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                  Featured New Additions
+                </h2>
+              </div>
+              <button 
+                onClick={() => router.push("/dashboard/books")} 
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
+              >
+                Explore Catalog
+              </button>
             </div>
 
             {isLoading ? (
@@ -312,13 +309,16 @@ try {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {books.slice(0, 3).map((book) => (
-                  // Problem 2 Fix: Track maps reassigned from book.id to book._id
-                  <div key={book._id} className="p-4 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition flex flex-col justify-between group">
+                  <div 
+                    key={book._id} 
+                    onClick={() => router.push(`/dashboard/books?id=${book._id}`)}
+                    className="p-4 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition flex flex-col justify-between group cursor-pointer"
+                  >
                     <div>
                       <span className="text-[9px] font-extrabold text-indigo-600 tracking-wider bg-indigo-50 px-2 py-0.5 rounded-md uppercase">
                         {book.category || "General"}
                       </span>
-                      <h3 className="text-xs font-bold text-slate-900 mt-2 line-clamp-2 tracking-tight group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-xs font-bold text-slate-900 mt-2 line-clamp-2 tracking-tight group-hover:text-indigo-600 transition-colors">
                         {book.title}
                       </h3>
                     </div>
@@ -337,11 +337,19 @@ try {
           
           {/* Upcoming Leased Books Monitoring Stream Tracker Panel */}
           <section className="border border-slate-200/80 rounded-2xl bg-white p-6 shadow-sm h-full flex flex-col">
-            <div className="flex items-center gap-2 mb-4 border-b border-slate-50 pb-3">
-              <div className="w-1.5 h-4 bg-rose-500 rounded-full" />
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Upcoming Due Leases
-              </h2>
+            <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-rose-500 rounded-full" />
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                  Upcoming Due Leases
+                </h2>
+              </div>
+              <button 
+                onClick={() => router.push("/dashboard/rentals")} 
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
+              >
+                Manage
+              </button>
             </div>
 
             {isLoading ? (
@@ -356,8 +364,11 @@ try {
             ) : (
               <div className="space-y-3 flex-1 overflow-y-auto">
                 {rentals.map((rental) => (
-                  // Problem 2 Fix: Track maps reassigned from rental.id to rental._id
-                  <div key={rental._id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white shadow-2xs hover:border-slate-200 transition">
+                  <div 
+                    key={rental._id} 
+                    onClick={() => router.push("/dashboard/rentals")}
+                    className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white shadow-2xs hover:border-slate-200 transition cursor-pointer"
+                  >
                     <div className="min-w-0 pr-2">
                       <p className="text-xs font-bold text-slate-800 truncate tracking-tight">
                         {getBookTitle(rental.book)}

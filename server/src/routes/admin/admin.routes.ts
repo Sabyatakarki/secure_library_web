@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authorizedMiddleware } from "../../middleware/auth.middlware";
-
+import adminRentalController from "../../controllers/admin/adminRental.controller";
 import { AdminUserController } from "../../controllers/admin/adminUser.controller";
 import adminReservationController from "../../controllers/admin/adminReservation.controller";
 
@@ -76,6 +76,24 @@ router.put(
 router.put(
   "/reservations/cancel/:reservationId",
   adminReservationController.cancelReservation
+);
+
+
+router.get(
+  "/rentals",
+  adminRentalController.getAllRentals
+);
+
+// Get single rental
+router.get(
+  "/rentals/:rentalId",
+  adminRentalController.getRentalById
+);
+
+// Return book
+router.put(
+  "/rentals/return/:rentalId",
+  adminRentalController.returnBook
 );
 
 

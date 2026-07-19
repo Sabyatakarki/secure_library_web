@@ -16,6 +16,20 @@ export const setUserData = async (userData: any) => {
   });
 };
 
+// NEW
+export const setLibraryToken = async (token: string) => {
+  const cookieStore = await cookies();
+
+  cookieStore.set({
+    name: "library_token",
+    value: token,
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+};
+
 // Get User Data
 export const getUserData = async () => {
   const cookieStore = await cookies();
@@ -25,9 +39,10 @@ export const getUserData = async () => {
   return data ? JSON.parse(data) : null;
 };
 
-// Clear User Data
+// Clear Cookies
 export const clearAuthCookies = async () => {
   const cookieStore = await cookies();
 
   cookieStore.delete("user_data");
+  cookieStore.delete("library_token");
 };

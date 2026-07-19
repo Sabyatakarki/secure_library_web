@@ -1,33 +1,161 @@
 import { Request, Response } from "express";
-import rentalService from "../services/rental.service";
+import reservationService from "../services/resevation.service";
 
-class RentalController {
+class ReservationController {
 
 
-  // Student: View My Rentals
-  async getMyRentals(
-    req: Request,
+  // Student: Reserve Book
+  async reserveBook(
+    req: Request<{ bookId: string }>,
     res: Response
-  ){
+  ) {
 
-    try{
+    try {
 
       const result =
-        await rentalService.getMyRentals(
+        await reservationService.reserveBook(
+          req.user!._id.toString(),
+          req.params.bookId
+        );
+
+
+      return res.status(201).json({
+
+        success: true,
+
+        message: "Book reserved successfully.",
+
+        data: result
+
+      });
+
+
+    } catch (error: any) {
+
+      return res.status(
+        error.statusCode || 400
+      ).json({
+
+        success: false,
+
+        message: error.message
+
+      });
+
+    }
+
+  }
+
+
+
+  // Student: View My Reservations
+  async getMyReservations(
+    req: Request,
+    res: Response
+  ) {
+
+    try {
+
+      const result =
+        await reservationService.getMyReservations(
           req.user!._id.toString()
         );
 
 
       return res.status(200).json({
 
-        success:true,
+        success: true,
 
-        data:result
+        data: result
 
       });
 
 
-    }catch(error:any){
+    } catch (error: any) {
+
+      return res.status(
+        error.statusCode || 400
+      ).json({
+
+        success: false,
+
+        message: error.message
+
+      });
+
+    }
+
+  }
+
+
+
+
+  // Student: Cancel Reservation
+  async cancelReservation(
+    req: Request<{ reservationId: string }>,
+    res: Response
+  ) {
+
+    try {
+
+      const result =
+        await reservationService.cancelReservation(
+          req.params.reservationId,
+          req.user!._id.toString()
+        );
+
+
+      return res.status(200).json({
+
+        success: true,
+
+        message: result.message
+
+      });
+
+
+    } catch (error: any) {
+
+      return res.status(
+        error.statusCode || 400
+      ).json({
+
+        success: false,
+
+        message: error.message
+
+      });
+
+    }
+
+  }
+
+
+
+
+
+  // Admin: View All Reservations
+  async getAllReservations(
+    req: Request,
+    res: Response
+  ) {
+
+    try {
+
+      const result =
+        await reservationService.getAllReservations();
+
+
+      return res.status(200).json({
+
+        success: true,
+
+        data: result
+
+      });
+
+
+    } catch (error: any) {
 
       return res.status(
         error.statusCode || 400
@@ -47,31 +175,74 @@ class RentalController {
 
 
 
-  // Student: Return Book
-  async returnBook(
-    req:Request<{rentalId:string}>,
-    res:Response
-  ){
+  // Admin: Approve Reservation
+  async approveReservation(
+    req: Request<{ reservationId: string }>,
+    res: Response
+  ) {
 
-    try{
-
+    try {
 
       const result =
-        await rentalService.returnBook(
-          req.params.rentalId
+        await reservationService.approveReservation(
+          req.params.reservationId,
+          req.user!._id.toString()
         );
-
 
 
       return res.status(200).json({
 
         success:true,
 
-        message:
-        result.message
+        message:"Reservation approved successfully.",
+
+        data:result
 
       });
 
+
+    } catch(error:any){
+
+      return res.status(
+        error.statusCode || 400
+      ).json({
+
+        success:false,
+
+        message:error.message
+
+      });
+
+    }
+
+  }
+
+
+
+
+
+  // Admin: Cancel Reservation
+  async adminCancelReservation(
+    req: Request<{ reservationId:string }>,
+    res: Response
+  ){
+
+    try{
+
+
+      const result =
+        await reservationService.adminCancelReservation(
+          req.params.reservationId
+        );
+
+
+      return res.status(200).json({
+
+        success:true,
+
+        message:result.message
+
+      });
 
 
     }catch(error:any){
@@ -94,4 +265,4 @@ class RentalController {
 }
 
 
-export default new RentalController();
+export default new ReservationController();

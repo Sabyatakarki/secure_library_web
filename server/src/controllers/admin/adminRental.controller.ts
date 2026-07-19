@@ -1,108 +1,64 @@
 import { Request, Response } from "express";
-import adminReservationService from "../../services/admin/adminReservation.service";
+import adminRentalService from "../../services/admin/adminRental.service";
 
-class AdminReservationController {
-  // Get All Reservations
-  async getAllReservations(req: Request, res: Response) {
+class AdminRentalController {
+  // Get All Rentals
+  async getAllRentals(req: Request, res: Response) {
     try {
-      const reservations =
-        await adminReservationService.getAllReservations();
+      const rentals = await adminRentalService.getAllRentals();
 
       return res.status(200).json({
         success: true,
-        message: "Reservations fetched successfully.",
-        data: reservations,
+        message: "Rentals fetched successfully.",
+        data: rentals,
       });
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({
+      return res.status(error.statusCode || 500).json({
         success: false,
-        message: error.message,
+        message: error.message || "Internal Server Error",
       });
     }
   }
 
-  // Approve Reservation
-  async approveReservation(req: Request, res: Response) {
+  // Get Rental By ID
+  async getRentalById(req: Request, res: Response) {
     try {
-      const reservationId = Array.isArray(req.params.reservationId)
-        ? req.params.reservationId[0]
-        : req.params.reservationId;
+      const rentalId = req.params.rentalId as string;
 
-      const result =
-await adminReservationService.approveReservation(
-  String(reservationId),
-  req.user!._id.toString()
-);
+      const rental = await adminRentalService.getRentalById(rentalId);
 
       return res.status(200).json({
         success: true,
-        message: "Reservation approved successfully.",
-        data: result,
+        message: "Rental fetched successfully.",
+        data: rental,
       });
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({
+      return res.status(error.statusCode || 500).json({
         success: false,
-        message: error.message,
+        message: error.message || "Internal Server Error",
       });
     }
   }
 
-  // Reject Reservation
-  async rejectReservation(req: Request, res: Response) {
-  try {
-
-    const reservationId =
-      req.params.reservationId as string;
-
-
-    const result =
-      await adminReservationService.cancelReservation(
-        reservationId
-      );
-
-
-    return res.status(200).json({
-      success:true,
-      message:"Reservation rejected successfully.",
-      data:result
-    });
-
-
-  } catch(error:any){
-
-    return res.status(
-      error.statusCode || 400
-    ).json({
-      success:false,
-      message:error.message
-    });
-
-  }
-}
-
-  // Cancel Reservation
-  async cancelReservation(req: Request, res: Response) {
+  // Return Book
+  async returnBook(req: Request, res: Response) {
     try {
-      const reservationId = Array.isArray(req.params.reservationId)
-        ? req.params.reservationId[0]
-        : req.params.reservationId;
+      const rentalId = req.params.rentalId as string;
 
-      const result = await adminReservationService.cancelReservation(
-        String(reservationId)
-      );
+      const rental = await adminRentalService.returnBook(rentalId);
 
       return res.status(200).json({
         success: true,
-        message: "Reservation cancelled successfully.",
-        data: result,
+        message: "Book returned successfully.",
+        data: rental,
       });
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({
+      return res.status(error.statusCode || 500).json({
         success: false,
-        message: error.message,
+        message: error.message || "Internal Server Error",
       });
     }
   }
 }
 
-export default new AdminReservationController();
+export default new AdminRentalController();

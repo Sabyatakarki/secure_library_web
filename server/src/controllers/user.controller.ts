@@ -4,6 +4,8 @@ import userService from "../services/user.service";
 class UserController {
   // Register User
   async register(req: Request, res: Response) {
+
+    
     try {
       const result = await userService.register(req.body);
 
@@ -22,6 +24,8 @@ class UserController {
 
   // Login User
   async login(req: Request, res: Response) {
+     console.log("CONTROLLER LOGIN HIT");
+    
     try {
       const result = await userService.login(req.body);
 
@@ -37,6 +41,7 @@ return res.status(200).json({
   message: "Login successful.",
   data: {
     user: result.user,
+    token: result.token,
   },
 });
     } catch (error: any) {

@@ -64,11 +64,11 @@ export default function RegisterForm() {
     if (hasValidLength) passedRules++;
 
     if (passedRules <= 2) {
-      setPasswordStrength({ score: 1, label: "Weak ⬜", colorClass: "bg-rose-500 w-1/3", textColor: "text-rose-600" });
+      setPasswordStrength({ score: 1, label: "Weak", colorClass: "bg-rose-500 w-1/3", textColor: "text-rose-600" });
     } else if (passedRules <= 4) {
-      setPasswordStrength({ score: 2, label: "Medium 🟨", colorClass: "bg-amber-500 w-2/3", textColor: "text-amber-600" });
+      setPasswordStrength({ score: 2, label: "Medium", colorClass: "bg-amber-500 w-2/3", textColor: "text-amber-600" });
     } else {
-      setPasswordStrength({ score: 3, label: "Strong 🟩", colorClass: "bg-emerald-500 w-full", textColor: "text-emerald-600" });
+      setPasswordStrength({ score: 3, label: "Strong", colorClass: "bg-emerald-500 w-full", textColor: "text-emerald-600" });
     }
   }, [formData.password]);
 
@@ -85,7 +85,7 @@ export default function RegisterForm() {
     setSuccessMessage("");
 
     if (!/^\d+$/.test(formData.studentId)) {
-      setErrorMessage("Student ID must contain only numeric characters.");
+      setErrorMessage("Personal ID must contain only numeric characters.");
       return;
     }
 
@@ -229,7 +229,7 @@ export default function RegisterForm() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-slate-400 tracking-wider uppercase pl-1">Student ID</label>
+                <label className="text-[11px] font-bold text-slate-400 tracking-wider uppercase pl-1">Peronal ID</label>
                 <input type="text" name="studentId" placeholder="20261102" value={formData.studentId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-500/5" required disabled={loading || !!successMessage} />
               </div>
 

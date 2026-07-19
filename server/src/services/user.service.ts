@@ -12,6 +12,8 @@ class UserService {
   async register(data: RegisterUserDto) {
     const existingEmail = await userRepository.findByEmail(data.email);
 
+
+    
     if (existingEmail) {
       throw new HttpError(400, "Email already exists");
     }
@@ -46,15 +48,85 @@ class UserService {
       throw new HttpError(401, "Invalid email or password");
     }
 
+    // Check if account is currently locked
+if (user.accountLocked) {
+
+  if (
+    user.lockUntil &&
+    user.lockUntil > new Date()
+  ) {
+
+    throw new HttpError(
+  403,
+  `Account is locked until ${user.lockUntil.toLocaleString()}`
+);
+
+  }
+
+  // Lock time has expired, unlock automatically
+  user.accountLocked = false;
+  user.failedLoginAttempts = 0;
+  user.lockUntil = null;
+  user.lastLogin = new Date();
+
+  await user.save();
+}
+
     const passwordMatch = await bcrypt.compare(
       data.password,
       user.password
     );
 
-    if (!passwordMatch) {
-      throw new HttpError(401, "Invalid email or password");
-    }
+    console.log("Password Match:", passwordMatch);
 
+    if (!passwordMatch) {
+
+  console.log("Wrong password block executed");
+
+  user.failedLoginAttempts += 1;
+
+  console.log("Attempts:", user.failedLoginAttempts);
+
+  if (user.failedLoginAttempts >= 5) {
+
+    console.log("ACCOUNT LOCKED");
+
+    user.accountLocked = true;
+
+    const lockTime = new Date();
+
+    lockTime.setMinutes(
+      lockTime.getMinutes() + 15
+    );
+
+    user.lockUntil = lockTime;
+
+  }
+
+  await user.save();
+
+  console.log("Saved!");
+
+  const check = await userRepository.findById(
+    user._id.toString()
+  );
+
+  console.log(
+    "Database failed attempts:",
+    check?.failedLoginAttempts
+  );
+
+  throw new HttpError(
+    401,
+    "Invalid email or password"
+  );
+}
+// Login successful
+user.failedLoginAttempts = 0;
+user.accountLocked = false;
+user.lockUntil = null;
+
+await user.save();
     const token = jwt.sign(
       {
         id: user._id,
@@ -117,6 +189,8 @@ class UserService {
       currentPassword,
       user.password
     );
+
+    
 
     if (!passwordMatch) {
       throw new HttpError(400, "Current password is incorrect");

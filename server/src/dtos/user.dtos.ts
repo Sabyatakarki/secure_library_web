@@ -8,7 +8,7 @@ export interface RegisterUserDto {
   semester: number;
   address?: string;
   profilePicture?: string;
-  role?: "Student" | "Librarian";
+  role?: "Student" | "Admin";
 }
 
 export interface LoginUserDto {
