@@ -37,6 +37,31 @@ export const login = async (loginData: any) => {
   }
 };
 
+// Verify Login MFA
+export const verifyLoginMfa = async (
+  email: string,
+  token: string
+) => {
+  try {
+    const response = await axios.post(
+      "/mfa/login",
+      {
+        email,
+        token,
+      }
+    );
+
+    return response.data;
+
+  } catch (error: Error | any) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "MFA verification failed."
+    );
+  }
+};
+
 // Get Logged-in User
 export const whoami = async () => {
   try {

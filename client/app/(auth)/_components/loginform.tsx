@@ -89,7 +89,22 @@ export default function LoginForm() {
     try {
       const response = await loginUser(formData);
 
-      if (!response.success) {
+
+// MFA required
+if (response.requiresMfa) {
+
+  localStorage.setItem(
+    "mfaEmail",
+    response.email
+  );
+
+  router.push("/mfa_login");
+
+  return;
+}
+
+
+if (!response.success) {
         // Handle server-enforced account lockouts cleanly without incrementing local failure count
         if (response.message?.includes("Account is locked")) {
           setErrorMessage(response.message);

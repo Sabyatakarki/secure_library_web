@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { IUser } from "../models/user.model";
 import userRepository from "../repositories/user.repository";
 import { HttpError } from "../error/http-error";
+import { JWT_SECRET } from "../config";
 
 declare global {
   namespace Express {
@@ -20,40 +21,42 @@ export const authorizedMiddleware = async (
   try {
     let token: string | undefined;
 
-    // 1. Check Authorization Header
+    // Authorization Header
     const authHeader = req.headers.authorization;
 
     if (authHeader?.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
     }
 
-    // 2. Check Cookie
+    // Cookie
     if (!token && req.cookies?.library_token) {
       token = req.cookies.library_token;
     }
 
     if (!token) {
-      throw new HttpError(401, "Unauthorized. Token missing.");
+      throw new HttpError(
+        401,
+        "Unauthorized. Token missing."
+      );
     }
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      JWT_SECRET
     ) as { id: string };
-
-    if (!decoded?.id) {
-      throw new HttpError(401, "Invalid token.");
-    }
 
     const user = await userRepository.findById(decoded.id);
 
     if (!user) {
-      throw new HttpError(401, "User not found.");
+      throw new HttpError(
+        401,
+        "User not found."
+      );
     }
 
     req.user = user;
 
-    // Protect Admin Routes
+    // Admin protection
     if (
       req.originalUrl.startsWith("/api/admin") &&
       user.role !== "Admin"

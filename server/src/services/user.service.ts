@@ -35,7 +35,9 @@ class UserService {
     });
 
     const userData = user.toObject();
-    delete (userData as any).password;
+
+delete (userData as any).password;
+delete (userData as any).mfaSecret;
 
     return userData;
   }
@@ -127,7 +129,20 @@ user.accountLocked = false;
 user.lockUntil = null;
 
 await user.save();
-    const token = jwt.sign(
+
+
+// MFA CHECK
+if (user.mfaEnabled === true) {
+
+  return {
+    requiresMfa: true,
+    email: user.email,
+  };
+
+}
+
+
+const token = jwt.sign(
       {
         id: user._id,
         email: user.email,

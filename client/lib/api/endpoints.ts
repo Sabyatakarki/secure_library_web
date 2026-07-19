@@ -4,6 +4,7 @@ export const API = {
     REGISTER: "/users/register",
     LOGIN: "/users/login",
     LOGOUT: "/users/logout",
+    
 
     WHOAMI: "/users/profile",
     UPDATEPROFILE: "/users/profile",
@@ -15,6 +16,10 @@ export const API = {
     RESET_PASSWORD: (token: string) =>
       `/users/reset-password/${token}`,
   },
+
+  MFA: {
+  LOGIN_VERIFY: "/mfa/login",
+},
 
 
   USER: {
@@ -63,5 +68,7 @@ ADMIN: {
             `/admin/users/${id}`,
     }
 }
+
+
 
 };

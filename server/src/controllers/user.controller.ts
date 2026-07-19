@@ -23,34 +23,62 @@ class UserController {
   }
 
   // Login User
-  async login(req: Request, res: Response) {
-     console.log("CONTROLLER LOGIN HIT");
-    
-    try {
-      const result = await userService.login(req.body);
+// Login User
+async login(req: Request, res: Response) {
 
-    res.cookie("library_token", result.token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+  console.log("CONTROLLER LOGIN HIT");
 
-return res.status(200).json({
-  success: true,
-  message: "Login successful.",
-  data: {
-    user: result.user,
-    token: result.token,
-  },
-});
-    } catch (error: any) {
-      return res.status(error.statusCode || 400).json({
-        success: false,
-        message: error.message,
+  try {
+
+    const result = await userService.login(req.body);
+
+
+    // MFA required
+    if (result.requiresMfa) {
+
+      return res.status(200).json({
+        success: true,
+        message: "MFA verification required.",
+        data: {
+          requiresMfa: true,
+          email: result.email,
+        },
       });
+
     }
+
+
+    // Normal login
+    res.cookie("library_token", result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? "strict"
+          : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful.",
+      data: {
+        user: result.user,
+        token: result.token,
+      },
+    });
+
+
+  } catch (error: any) {
+
+    return res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+    });
+
   }
+}
 
   // Get Logged-in User Profile
   async getProfile(req: Request, res: Response) {

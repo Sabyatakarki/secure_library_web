@@ -36,8 +36,10 @@ export async function registerUser(userData: any) {
 }
 
 // Login
+// Login
 export async function loginUser(loginData: any) {
   try {
+
     const response = await axios.post(
       `${API_URL}/login`,
       loginData,
@@ -46,22 +48,50 @@ export async function loginUser(loginData: any) {
       }
     );
 
-    const user = response.data.data.user;
-const token = response.data.data.token;
 
-await setUserData(user);
-await setLibraryToken(token);
+    const data = response.data.data;
 
-return {
-  success: true,
-  data: user,
-};
+
+    // MFA required
+    if (data.requiresMfa) {
+
+      return {
+        success: true,
+        requiresMfa: true,
+        email: data.email,
+      };
+
+    }
+
+
+
+    // Normal login
+    const user = data.user;
+    const token = data.token;
+
+
+    await setUserData(user);
+
+    await setLibraryToken(token);
+
+
+
+    return {
+      success: true,
+      requiresMfa: false,
+      data: user,
+    };
+
+
   } catch (error: any) {
+
     return {
       success: false,
       message:
-        error.response?.data?.message || "Login failed",
+        error.response?.data?.message ||
+        "Login failed",
     };
+
   }
 }
 

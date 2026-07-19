@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes";
 import reservationRoutes from "./routes/reservation.routes";
 import rentalRoutes from "./routes/rental.routes";
 import adminRoutes from "./routes/admin/admin.routes";
+import mfaRoutes from "./routes/mfa.routes";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/mfa", mfaRoutes);
 
 app.use("/api/books", bookRoutes);
 app.use("/api/reservations", reservationRoutes);
