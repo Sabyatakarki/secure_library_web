@@ -4,7 +4,6 @@ export const API = {
     REGISTER: "/users/register",
     LOGIN: "/users/login",
     LOGOUT: "/users/logout",
-    
 
     WHOAMI: "/users/profile",
     UPDATEPROFILE: "/users/profile",
@@ -17,12 +16,13 @@ export const API = {
       `/users/reset-password/${token}`,
   },
 
- MFA: {
-  GENERATE: "/mfa/generate",
-  VERIFY: "/mfa/verify",
-  DISABLE: "/mfa/disable",
-  LOGIN_VERIFY: "/mfa/login",
-},
+
+  MFA: {
+    GENERATE: "/mfa/generate",
+    VERIFY: "/mfa/verify",
+    DISABLE: "/mfa/disable",
+    LOGIN_VERIFY: "/mfa/login",
+  },
 
 
   USER: {
@@ -54,24 +54,33 @@ export const API = {
       `/rentals/return/${id}`,
   },
 
-ADMIN: {
+
+  ADMIN: {
     USERS: {
 
-        CREATE: "/admin/users",
+      CREATE: "/admin/users",
 
-        GET_ALL: "/admin/users",
+      GET_ALL: "/admin/users",
 
-        GET_BY_ID: (id:string) =>
-            `/admin/users/${id}`,
+      GET_BY_ID: (id:string) =>
+        `/admin/users/${id}`,
 
-        UPDATE: (id:string) =>
-            `/admin/users/${id}`,
+      UPDATE: (id:string) =>
+        `/admin/users/${id}`,
 
-        DELETE: (id:string) =>
-            `/admin/users/${id}`,
+      DELETE: (id:string) =>
+        `/admin/users/${id}`,
     }
-}
+  },
 
+
+  PAYMENT: {
+
+    INITIATE: "/payment/initiate",
+
+    VERIFY: "/payment/verify",
+
+  }
 
 
 };
