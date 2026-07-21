@@ -76,6 +76,32 @@ class MfaService {
   /**
    * Verify MFA During Login
    */
+
+    /**
+   * Disable MFA
+   */
+  async disableMfa(userId:string){
+
+ const user = await userRepository.findById(userId);
+
+
+ if(!user){
+   throw new HttpError(404,"User not found");
+ }
+
+
+ user.mfaEnabled = false;
+ user.mfaSecret = "";
+
+
+ await user.save();
+
+
+ return {
+   message:"MFA disabled successfully."
+ };
+
+}
   async verifyLoginMfa(
     email: string,
     token: string

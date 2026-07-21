@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import mfaService from "../services/mfa.service";
+import { VerifyMfaDto } from "../dtos/mfa.dtos";
 
 class MfaController {
 
@@ -33,7 +34,7 @@ class MfaController {
     next: NextFunction
   ) {
     try {
-      const { token } = req.body;
+      const { token }: VerifyMfaDto = req.body;
 
       if (!token) {
         return res.status(400).json({
@@ -45,6 +46,28 @@ class MfaController {
       const result = await mfaService.verifyMfa(
         req.user!._id.toString(),
         token
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  // Disable MFA
+  async disableMfa(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const result = await mfaService.disableMfa(
+        req.user!._id.toString()
       );
 
       return res.status(200).json({

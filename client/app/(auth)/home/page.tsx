@@ -1,8 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Header from "../_components/header";
 import Footer from "../_components/footer";
-import Link from "next/link";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Step 3: Check login status when page loads
+  useEffect(() => {
+    async function checkUser() {
+      try {
+        const response = await fetch(
+          "http://localhost:5050/api/users/profile",
+          {
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          setCurrentUser(null);
+        } else {
+          const result = await response.json();
+          setCurrentUser(result.data);
+        }
+      } catch {
+        setCurrentUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    }
+
+    checkUser();
+  }, []);
+
+  // Step 4: Role-aware navigation handler
+  const handleGetStarted = () => {
+    if (!currentUser) {
+      router.push("/register");
+      return;
+    }
+
+    if (currentUser.role === "Admin") {
+      router.push("/admin/dashboard");
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <>
       <Header />
@@ -27,12 +76,23 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/10 transition-all active:scale-[0.99]"
+            {/* Step 5 & 6: Dynamic CTA Button */}
+            <button
+              onClick={handleGetStarted}
+              disabled={loadingUser}
+              className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/10 transition-all active:scale-[0.99] disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Get Started Now
-            </Link>
+              {loadingUser ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : currentUser ? (
+                "Go to Dashboard"
+              ) : (
+                "Get Started Now"
+              )}
+            </button>
 
             <a
               href="#books"
@@ -43,7 +103,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* BOOKS SECTION (Consolidated here with unique ID) */}
+        {/* BOOKS SECTION */}
         <section id="books" className="max-w-7xl mx-auto px-4 sm:px-6 py-20 border-t border-slate-200/60 scroll-mt-16">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
             <div>
@@ -77,7 +137,10 @@ export default function HomePage() {
                   <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition text-lg mb-1 line-clamp-1">{book.title}</h3>
                   <p className="text-xs text-slate-500 mb-6">By {book.author}</p>
                 </div>
-                <Link href="/login" className="w-full text-center text-xs font-semibold py-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 border border-slate-100 rounded-xl transition">
+                <Link 
+                  href={currentUser ? "/dashboard" : "/login"} 
+                  className="w-full text-center text-xs font-semibold py-2.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 border border-slate-100 rounded-xl transition"
+                >
                   Reserve This Volume
                 </Link>
               </div>
@@ -108,7 +171,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ABOUT US SECTION (Consolidated here with unique ID) */}
+        {/* ABOUT US SECTION */}
         <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 py-20 border-t border-slate-200/60 scroll-mt-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -197,7 +260,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* System Call To Action */}
+        {/* System Call To Action Section */}
         <section className="max-w-4xl mx-auto text-center py-24 px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight">
             Ready to Explore Our Catalog?
@@ -205,12 +268,22 @@ export default function HomePage() {
           <p className="mt-4 text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
             Construct your library catalog matrix configurations today. Gain secure access to instant material allocation logs, history matrices, and pending drop queues.
           </p>
-          <Link
-            href="/register"
-            className="inline-block mt-8 bg-blue-600 text-white px-10 py-3.5 rounded-xl font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/10 transition active:scale-[0.99]"
+          <button
+            onClick={handleGetStarted}
+            disabled={loadingUser}
+            className="inline-flex items-center justify-center gap-2 mt-8 bg-blue-600 text-white px-10 py-3.5 rounded-xl font-semibold hover:bg-blue-700 shadow-md shadow-blue-500/10 transition active:scale-[0.99] disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            Register Student Profile
-          </Link>
+            {loadingUser ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Loading...</span>
+              </>
+            ) : currentUser ? (
+              "Go to Dashboard"
+            ) : (
+              "Register Student Profile"
+            )}
+          </button>
         </section>
 
       </main>

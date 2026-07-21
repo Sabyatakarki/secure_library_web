@@ -91,6 +91,7 @@ export default function LoginForm() {
 
 
 // MFA required
+
 if (response.requiresMfa) {
 
   localStorage.setItem(
@@ -102,7 +103,6 @@ if (response.requiresMfa) {
 
   return;
 }
-
 
 if (!response.success) {
         // Handle server-enforced account lockouts cleanly without incrementing local failure count

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import api from "../../../lib/api/axios"; // <-- add this
 
 interface UserProfile {
   fullName: string;
@@ -18,29 +19,34 @@ export default function DashboardLayout({
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dynamic user identity parameters from the backend context
-  useEffect(() => {
-    async function fetchUserProfile() {
-      try {
-        const response = await fetch("/api/user/profile"); 
-        if (response.ok) {
-          const data = await response.json();
-          setUser({
-            fullName: data.fullName || "Active Student",
-            role: data.role || "Active Member",
-          });
-        } else {
-          setUser({ fullName: "Welcome Student", role: "Active Member" });
-        }
-      } catch (error) {
-        setUser({ fullName: "Welcome Student", role: "Active Member" });
-      } finally {
-        setIsLoading(false);
-      }
-    }
+ useEffect(() => {
+  async function fetchUserProfile() {
+    try {
+      const response = await api.get("/users/profile");
 
-    fetchUserProfile();
-  }, []);
+      const userData = response.data.data; // <-- important
+
+      setUser({
+        fullName: userData.fullName || "Active Student",
+        role: userData.role || "Student",
+      });
+
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+
+      setUser({
+        fullName: "Welcome Student",
+        role: "Student",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  fetchUserProfile();
+}, []);
+
+
 
   const getInitials = (name: string) => {
     const parts = name.split(" ");

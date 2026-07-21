@@ -76,7 +76,6 @@ async login(req: Request, res: Response) {
       success: false,
       message: error.message,
     });
-
   }
 }
 

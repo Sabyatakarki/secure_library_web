@@ -17,7 +17,10 @@ export const API = {
       `/users/reset-password/${token}`,
   },
 
-  MFA: {
+ MFA: {
+  GENERATE: "/mfa/generate",
+  VERIFY: "/mfa/verify",
+  DISABLE: "/mfa/disable",
   LOGIN_VERIFY: "/mfa/login",
 },
 

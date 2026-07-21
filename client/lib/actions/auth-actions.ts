@@ -41,12 +41,14 @@ export async function loginUser(loginData: any) {
   try {
 
     const response = await axios.post(
+      
       `${API_URL}/login`,
       loginData,
       {
         withCredentials: true,
       }
     );
+    console.log(response.data);
 
 
     const data = response.data.data;

@@ -25,6 +25,16 @@ router.post(
 );
 
 /**
+ * Disable MFA
+ * Logged-in users only
+ */
+router.put(
+  "/disable",
+  authorizedMiddleware,
+  mfaController.disableMfa
+);
+
+/**
  * Login MFA Verification
  * No JWT required because the user
  * has only completed the first step.

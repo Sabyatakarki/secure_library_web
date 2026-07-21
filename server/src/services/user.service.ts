@@ -130,7 +130,7 @@ user.lockUntil = null;
 
 await user.save();
 
-
+console.log("MFA Enabled:", user.mfaEnabled);
 // MFA CHECK
 if (user.mfaEnabled === true) {
 
