@@ -33,7 +33,7 @@ class RentalService {
 
     // Due date = 14 days from today
     const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 14);
+dueDate.setMinutes(dueDate.getMinutes() + 1);
 
     const rental = await Rental.create({
       user: reservation.user,

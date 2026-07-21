@@ -35,12 +35,22 @@ class PaymentService {
 
     }catch(error:any){
 
-      throw new Error(
-        error.response?.data?.detail ||
-        "Khalti payment initiation failed"
-      );
+console.log("KHALTI STATUS:",
+error.response?.status);
 
-    }
+console.log("KHALTI DATA:",
+error.response?.data);
+
+console.log("KHALTI MESSAGE:",
+error.message);
+
+
+throw new Error(
+error.response?.data?.detail ||
+"Khalti payment initiation failed"
+);
+
+}
 
   }
 

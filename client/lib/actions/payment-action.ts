@@ -4,28 +4,48 @@ import api from "../api/axios";
 import { API } from "../api/endpoints";
 
 
-export async function initiateKhaltiPayment(data:any){
+export async function initiateKhaltiPayment(data: any) {
 
-try{
+  try {
 
-
-const response = await api.post(
-API.PAYMENT.INITIATE,
-data
-);
-
-
-return response.data;
+    const response = await api.post(
+      API.PAYMENT.INITIATE,
+      data
+    );
 
 
-}catch(error:any){
+    return response.data;
 
-throw new Error(
-error.response?.data?.message ||
-"Khalti payment failed"
-);
 
-}
+  } catch (error: any) {
+
+    console.log(
+      "========== PAYMENT INITIATE ERROR =========="
+    );
+
+    console.log(
+      "Status:",
+      error.response?.status
+    );
+
+    console.log(
+      "Response:",
+      error.response?.data
+    );
+
+    console.log(
+      "Message:",
+      error.message
+    );
+
+
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      "Khalti payment failed"
+    );
+
+  }
 
 }
 
@@ -33,32 +53,48 @@ error.response?.data?.message ||
 
 
 export async function verifyKhaltiPayment(
-pidx:string
-){
+  pidx: string
+) {
 
-try{
+  try {
 
-
-const response =
-await api.post(
-API.PAYMENT.VERIFY,
-{
-pidx
-}
-);
+    const response = await api.post(
+      API.PAYMENT.VERIFY,
+      {
+        pidx
+      }
+    );
 
 
-return response.data;
+    return response.data;
 
 
+  } catch (error: any) {
 
-}catch(error:any){
 
-throw new Error(
-"Payment verification failed"
-);
+    console.log(
+      "========== PAYMENT VERIFY ERROR =========="
+    );
 
-}
 
+    console.log(
+      "Status:",
+      error.response?.status
+    );
+
+
+    console.log(
+      "Response:",
+      error.response?.data
+    );
+
+
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      "Payment verification failed"
+    );
+
+  }
 
 }

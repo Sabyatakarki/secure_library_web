@@ -1,77 +1,83 @@
-import {Request,Response} from "express";
+import { Request, Response } from "express";
 import paymentService from "../services/payment.service";
 
 
-class PaymentController{
+class PaymentController {
 
 
-async initiatePayment(
-req:Request,
-res:Response
-){
+  async initiatePayment(
+    req: Request,
+    res: Response
+  ) {
 
-try{
+    try {
 
-
-const payment =
-await paymentService.initiatePayment(req.body);
-
-
-res.status(200).json({
-success:true,
-data:payment
-});
+      console.log("========== PAYMENT REQUEST ==========");
+      console.log(req.body);
 
 
-}catch(error:any){
-
-res.status(500).json({
-success:false,
-message:error.message
-});
+      const payment =
+        await paymentService.initiatePayment(req.body);
 
 
-}
-
-}
-
-
-
-async verifyPayment(
-req:Request,
-res:Response
-){
-
-try{
+      res.status(200).json({
+        success: true,
+        data: payment
+      });
 
 
-const {pidx}=req.body;
+    } catch (error: any) {
+
+      console.log("========== PAYMENT ERROR ==========");
+      console.log(error.message);
 
 
-const result =
-await paymentService.verifyPayment(pidx);
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+
+    }
+
+  }
 
 
 
-res.status(200).json({
-success:true,
-data:result
-});
+
+  async verifyPayment(
+    req: Request,
+    res: Response
+  ) {
+
+    try {
+
+      const { pidx } = req.body;
 
 
-
-}catch(error:any){
-
-res.status(500).json({
-success:false,
-message:error.message
-});
+      const result =
+        await paymentService.verifyPayment(pidx);
 
 
-}
+      res.status(200).json({
+        success: true,
+        data: result
+      });
 
 
-}
+    } catch (error: any) {
+
+      console.log("========== VERIFY PAYMENT ERROR ==========");
+      console.log(error.message);
+
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+
+    }
+
+  }
 
 
 }

@@ -9,7 +9,6 @@ const router = Router();
 
 router.post(
 "/initiate",
-authorizedMiddleware,
 paymentController.initiatePayment
 );
 
@@ -17,7 +16,6 @@ paymentController.initiatePayment
 
 router.post(
 "/verify",
-authorizedMiddleware,
 paymentController.verifyPayment
 );
 

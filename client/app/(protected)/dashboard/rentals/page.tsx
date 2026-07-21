@@ -68,7 +68,7 @@ export default function RentalsPage() {
         amount: fineAmount,
         purchase_order_id: `FINE-${rental._id}`,
         purchase_order_name: `Late return fine - ${rental.book.title}`,
-        return_url: "http://localhost:3003/payment/success",
+        return_url: "http://localhost:3003/payment",
         website_url: "http://localhost:3003",
         name: "Student",
         email: "student@example.com",

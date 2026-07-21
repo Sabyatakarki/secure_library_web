@@ -8,6 +8,7 @@ import reservationRoutes from "./routes/reservation.routes";
 import rentalRoutes from "./routes/rental.routes";
 import adminRoutes from "./routes/admin/admin.routes";
 import mfaRoutes from "./routes/mfa.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 const app = express();
 
@@ -50,5 +51,7 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/rentals", rentalRoutes);
 
 app.use("/api/admin", adminRoutes);
+
+app.use("/api/payment", paymentRoutes);
 
 export default app;
