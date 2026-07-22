@@ -55,23 +55,42 @@ export const API = {
   },
 
 
-  ADMIN: {
-    USERS: {
+ ADMIN: {
+  USERS: {
+    CREATE: "/admin/users",
 
-      CREATE: "/admin/users",
+    GET_ALL: "/admin/users",
 
-      GET_ALL: "/admin/users",
+    GET_BY_ID: (id: string) =>
+      `/admin/users/${id}`,
 
-      GET_BY_ID: (id:string) =>
-        `/admin/users/${id}`,
+    UPDATE: (id: string) =>
+      `/admin/users/${id}`,
 
-      UPDATE: (id:string) =>
-        `/admin/users/${id}`,
-
-      DELETE: (id:string) =>
-        `/admin/users/${id}`,
-    }
+    DELETE: (id: string) =>
+      `/admin/users/${id}`,
   },
+
+  RESERVATIONS: {
+    GET_ALL: "/admin/reservations",
+    APPROVE: (id: string) =>
+      `/admin/reservations/approve/${id}`,
+    CANCEL: (id: string) =>
+      `/admin/reservations/cancel/${id}`,
+  },
+
+  RENTALS: {
+    GET_ALL: "/admin/rentals",
+    GET_BY_ID: (id: string) =>
+      `/admin/rentals/${id}`,
+    RETURN: (id: string) =>
+      `/admin/rentals/return/${id}`,
+  },
+
+  ACTIVITY_LOGS: {
+    GET_ALL: "/admin/activity-logs",
+  },
+},
 
 
   PAYMENT: {
