@@ -51,17 +51,16 @@ class PaymentController {
 
     try {
 
-      const { pidx } = req.body;
+      const {
+  pidx,
+  purchase_order_id,
+} = req.body;
 
-
-      const result =
-        await paymentService.verifyPayment(pidx);
-
-
-      res.status(200).json({
-        success: true,
-        data: result
-      });
+const result =
+  await paymentService.verifyPayment(
+    pidx,
+    purchase_order_id
+  );
 
 
     } catch (error: any) {

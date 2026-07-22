@@ -1,64 +1,158 @@
 import { Request, Response } from "express";
 import adminRentalService from "../../services/admin/adminRental.service";
 
+
 class AdminRentalController {
+
+
   // Get All Rentals
   async getAllRentals(req: Request, res: Response) {
+
     try {
-      const rentals = await adminRentalService.getAllRentals();
+
+      const rentals =
+        await adminRentalService.getAllRentals();
+
 
       return res.status(200).json({
+
         success: true,
+
         message: "Rentals fetched successfully.",
+
         data: rentals,
+
       });
-    } catch (error: any) {
-      return res.status(error.statusCode || 500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
+
+
+    } catch(error:any){
+
+      return res.status(
+        error.statusCode || 500
+      ).json({
+
+        success:false,
+
+        message:
+        error.message ||
+        "Internal Server Error"
+
       });
+
     }
+
   }
+
+
 
   // Get Rental By ID
-  async getRentalById(req: Request, res: Response) {
-    try {
-      const rentalId = req.params.rentalId as string;
+  async getRentalById(
+    req: Request,
+    res: Response
+  ){
 
-      const rental = await adminRentalService.getRentalById(rentalId);
+    try {
+
+
+      const rentalId =
+      req.params.rentalId as string;
+
+
+      const rental =
+      await adminRentalService.getRentalById(
+        rentalId
+      );
+
 
       return res.status(200).json({
-        success: true,
-        message: "Rental fetched successfully.",
-        data: rental,
+
+        success:true,
+
+        message:
+        "Rental fetched successfully.",
+
+        data:rental
+
       });
-    } catch (error: any) {
-      return res.status(error.statusCode || 500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
+
+
+
+    }catch(error:any){
+
+
+      return res.status(
+        error.statusCode || 500
+      ).json({
+
+        success:false,
+
+        message:
+        error.message ||
+        "Internal Server Error"
+
       });
+
     }
+
   }
+
+
+
+
 
   // Return Book
-  async returnBook(req: Request, res: Response) {
-    try {
-      const rentalId = req.params.rentalId as string;
+  async returnBook(
+    req:Request,
+    res:Response
+  ){
 
-      const rental = await adminRentalService.returnBook(rentalId);
+    try{
+
+
+      const rentalId =
+      req.params.rentalId as string;
+
+
+      const rental =
+      await adminRentalService.returnBook(
+        rentalId
+      );
+
 
       return res.status(200).json({
-        success: true,
-        message: "Book returned successfully.",
-        data: rental,
+
+        success:true,
+
+        message:
+        "Book returned successfully.",
+
+        data:rental
+
       });
-    } catch (error: any) {
-      return res.status(error.statusCode || 500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
+
+
+    }catch(error:any){
+
+
+      return res.status(
+        error.statusCode || 500
+      ).json({
+
+        success:false,
+
+        message:
+        error.message ||
+        "Internal Server Error"
+
       });
+
+
     }
+
   }
+
+
 }
+
 
 export default new AdminRentalController();

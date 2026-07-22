@@ -18,19 +18,42 @@ export default function PaymentSuccessPage() {
 
     const verifyPayment = async () => {
 
-      const pidx = searchParams.get("pidx");
+      const pidx =
+        searchParams.get("pidx");
 
 
-      if (!pidx) {
-        setMessage("Payment verification failed.");
+      const purchaseOrderId =
+        searchParams.get(
+          "purchase_order_id"
+        );
+
+
+      if (!pidx || !purchaseOrderId) {
+
+        setMessage(
+          "Payment information missing."
+        );
+
         return;
       }
 
 
+
       try {
 
-        const response =
-          await verifyKhaltiPayment(pidx);
+
+        const pidx = searchParams.get("pidx");
+const purchaseOrderId = searchParams.get("purchase_order_id");
+
+if (!pidx || !purchaseOrderId) {
+  setMessage("Payment verification failed.");
+  return;
+}
+
+const response = await verifyKhaltiPayment(
+  pidx,
+  purchaseOrderId
+);
 
 
         console.log(
@@ -39,7 +62,10 @@ export default function PaymentSuccessPage() {
         );
 
 
-        if(response?.data?.status === "Completed"){
+
+        if(
+          response?.data?.status === "Completed"
+        ){
 
           setMessage(
             "Payment successful! Your fine has been cleared."
@@ -53,6 +79,7 @@ export default function PaymentSuccessPage() {
           );
 
         }
+
 
 
       } catch(error){

@@ -1,18 +1,24 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IRental extends Document {
-  user: Types.ObjectId;
-  book: Types.ObjectId;
-  reservation: Types.ObjectId;
 
-  rentalDate: Date;
-  dueDate: Date;
-  returnDate?: Date;
+user: Types.ObjectId;
+book: Types.ObjectId;
+reservation: Types.ObjectId;
 
-  status: "Borrowed" | "Returned" | "Overdue";
+rentalDate: Date;
+dueDate: Date;
+returnDate?: Date;
 
-  createdAt: Date;
-  updatedAt: Date;
+status:"Borrowed" | "Returned" | "Overdue";
+
+fineAmount?: number;
+
+finePaid?: boolean;
+
+createdAt:Date;
+updatedAt:Date;
+
 }
 
 const RentalSchema = new Schema<IRental>(
@@ -49,6 +55,16 @@ const RentalSchema = new Schema<IRental>(
     returnDate: {
       type: Date,
     },
+    fineAmount:{
+ type:Number,
+ default:0
+},
+
+
+finePaid:{
+ type:Boolean,
+ default:false
+},
 
     status: {
       type: String,
