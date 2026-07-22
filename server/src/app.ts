@@ -9,6 +9,8 @@ import rentalRoutes from "./routes/rental.routes";
 import adminRoutes from "./routes/admin/admin.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import paymentRoutes from "./routes/payment.routes";
+import { apiLimiter } from "./middleware/rateLimit.middlware";
+
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(apiLimiter);
 
 // Static Files
 app.use(
