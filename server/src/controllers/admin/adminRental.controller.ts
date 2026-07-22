@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import adminRentalService from "../../services/admin/adminRental.service";
+import activityLogService from "../../services/admin/activityLogs.service";
 
 
 class AdminRentalController {
@@ -12,6 +13,7 @@ class AdminRentalController {
 
       const rentals =
         await adminRentalService.getAllRentals();
+        
 
 
       return res.status(200).json({
@@ -62,6 +64,13 @@ class AdminRentalController {
       await adminRentalService.getRentalById(
         rentalId
       );
+
+      await activityLogService.create({
+  user: req.user,
+  action: "Returned Book",
+  description: `Returned rental ${rentalId}`,
+  ipAddress: req.ip,
+});
 
 
       return res.status(200).json({

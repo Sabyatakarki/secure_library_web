@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import adminReservationService from "../../services/admin/adminReservation.service";
+import activityLogService from "../../services/admin/activityLogs.service";
 
 class AdminReservationController {
 
@@ -85,6 +86,13 @@ class AdminReservationController {
           req.user!._id.toString()
         );
 
+        await activityLogService.create({
+  user: req.user,
+  action: "Approved Reservation",
+  description: `Approved reservation ${reservationId}`,
+  ipAddress: req.ip,
+});
+
 
 
       return res.status(200).json({
@@ -156,6 +164,12 @@ class AdminReservationController {
         await adminReservationService.cancelReservation(
           reservationId
         );
+        await activityLogService.create({
+  user: req.user,
+  action: "Cancelled Reservation",
+  description: `Cancelled reservation ${reservationId}`,
+  ipAddress: req.ip,
+});
 
 
 
