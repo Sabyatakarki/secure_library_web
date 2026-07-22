@@ -51,78 +51,61 @@ class AdminReservationController {
 
 
   // Librarian: Approve Reservation
-  async approveReservation(
-    req:Request,
-    res:Response
-  ){
+async approveReservation(
+  req: Request,
+  res: Response
+) {
 
-    try{
+  try {
 
-
-      const reservationId =
-        req.params.reservationId as string;
-
+    const reservationId =
+      req.params.reservationId as string;
 
 
-      if(!reservationId){
+    if (!reservationId) {
 
-        return res.status(400).json({
-
-          success:false,
-
-          message:
-          "reservationId is required"
-
-        });
-
-      }
-
-
-
-
-      const rental =
-        await adminReservationService.approveReservation(
-          reservationId,
-          req.user!._id.toString()
-        );
-
-        await activityLogService.create({
-  user: req.user,
-  action: "Approved Reservation",
-  description: `Approved reservation ${reservationId}`,
-  ipAddress: req.ip,
-});
-
-
-
-      return res.status(200).json({
-
-        success:true,
-
-        message:
-        "Reservation approved successfully.",
-
-        data:rental
-
-      });
-
-
-
-    }catch(error:any){
-
-      return res.status(
-        error.statusCode || 500
-      ).json({
-
+      return res.status(400).json({
         success:false,
-
-        message:error.message
-
+        message:"reservationId is required"
       });
 
     }
 
+
+    const rental =
+      await adminReservationService.approveReservation(
+        reservationId,
+        req.user!._id.toString()
+      );
+
+
+    return res.status(200).json({
+
+      success:true,
+
+      message:
+      "Reservation approved successfully.",
+
+      data:rental
+
+    });
+
+
+  } catch(error:any) {
+
+    return res.status(
+      error.statusCode || 500
+    ).json({
+
+      success:false,
+
+      message:error.message
+
+    });
+
   }
+
+}
 
 
 

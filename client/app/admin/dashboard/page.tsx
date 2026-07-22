@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "../../../lib/api/axios";
+import Link from "next/link";
 
 interface Book {
   _id: string;
@@ -205,6 +206,49 @@ export default function AdminDashboardPage() {
           </div>
         ))}
       </div>
+      {/* Quick Actions */}
+<div className="bg-white rounded-2xl border border-slate-200 p-6">
+  <h2 className="text-lg font-bold text-slate-800 mb-4">
+    Quick Actions
+  </h2>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <Link
+      href="/admin/dashboard/activityLogs"
+      className="border rounded-xl p-4 hover:bg-slate-50 hover:border-blue-500 transition"
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+          <svg
+            className="w-5 h-5 text-blue-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 17v-6h6v6m-8 4h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <h3 className="font-semibold text-slate-800">
+            Activity Logs
+          </h3>
+
+          <p className="text-xs text-slate-500">
+            View administrator actions
+          </p>
+        </div>
+      </div>
+    </Link>
+
+  </div>
+</div>
 
       {/* Tables Matrix Workspace Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -6,6 +6,7 @@ import { JWT_SECRET } from "../config";
 import { CLIENT_URL } from "../config";
 import { HttpError } from "../error/http-error";
 import { sendEmail } from "../config/email";
+import activityLogService from "./admin/activityLogs.service";
 
 class UserService {
   // Register User
@@ -33,6 +34,12 @@ class UserService {
       password: hashedPassword,
       role: data.role || "Student",
     });
+
+    await activityLogService.create({
+  user,
+  action: "User Registration",
+  description: `${user.fullName} registered a new account`,
+});
 
     const userData = user.toObject();
 
@@ -66,12 +73,13 @@ if (user.accountLocked) {
   }
 
   // Lock time has expired, unlock automatically
-  user.accountLocked = false;
-  user.failedLoginAttempts = 0;
-  user.lockUntil = null;
-  user.lastLogin = new Date();
+ // Login successful
+user.failedLoginAttempts = 0;
+user.accountLocked = false;
+user.lockUntil = null;
+user.lastLogin = new Date();
 
-  await user.save();
+await user.save();
 }
 
     const passwordMatch = await bcrypt.compare(
@@ -130,7 +138,23 @@ user.lockUntil = null;
 
 await user.save();
 
+// Login successful
+user.failedLoginAttempts = 0;
+user.accountLocked = false;
+user.lockUntil = null;
+user.lastLogin = new Date();
+
+await user.save();
+
+await activityLogService.create({
+  user,
+  action: "User Login",
+  description: `${user.fullName} logged into the system`,
+  ipAddress: data.ipAddress,
+});
+
 console.log("MFA Enabled:", user.mfaEnabled);
+
 // MFA CHECK
 if (user.mfaEnabled === true) {
 
@@ -185,6 +209,12 @@ const token = jwt.sign(
       throw new HttpError(404, "User not found");
     }
 
+    await activityLogService.create({
+      user,
+      action: "Profile Updated",
+      description: `${user.fullName} updated their profile`,
+    });
+
     return user;
   }
 
@@ -195,6 +225,8 @@ const token = jwt.sign(
     newPassword: string
   ) {
     const user = await userRepository.findById(userId);
+
+    
 
     if (!user) {
       throw new HttpError(404, "User not found");
@@ -214,6 +246,12 @@ const token = jwt.sign(
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await userRepository.updatePassword(userId, hashedPassword);
+
+    await activityLogService.create({
+  user,
+  action: "Password Changed",
+  description: `${user.fullName} changed their password`,
+});
 
     return {
       message: "Password changed successfully",

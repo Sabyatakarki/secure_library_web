@@ -13,10 +13,11 @@ class ReservationController {
     try {
 
       const result =
-        await reservationService.reserveBook(
-          req.user!._id.toString(),
-          req.params.bookId
-        );
+  await reservationService.reserveBook(
+    req.user!._id.toString(),
+    req.params.bookId,
+    req.ip
+  );
 
 
       return res.status(201).json({
@@ -130,10 +131,6 @@ class ReservationController {
 
   }
 
-
-
-
-
   // Admin: View All Reservations
   async getAllReservations(
     req: Request,
@@ -170,11 +167,6 @@ class ReservationController {
     }
 
   }
-
-
-
-
-
   // Admin: Approve Reservation
   async approveReservation(
     req: Request<{ reservationId: string }>,
@@ -217,50 +209,45 @@ class ReservationController {
 
   }
 
+  // Librarian: Cancel Reservation
+async cancelReservationByLibrarian(
+  req: Request<{ reservationId:string }>,
+  res: Response
+){
+
+  try{
+
+    const result =
+      await reservationService.cancelReservationByLibrarian(
+        req.params.reservationId,
+        req.user!._id.toString()
+      );
 
 
+    return res.status(200).json({
+
+      success:true,
+
+      message:result.message
+
+    });
 
 
-  // Admin: Cancel Reservation
-  async adminCancelReservation(
-    req: Request<{ reservationId:string }>,
-    res: Response
-  ){
+  }catch(error:any){
 
-    try{
+    return res.status(
+      error.statusCode || 400
+    ).json({
 
+      success:false,
 
-      const result =
-        await reservationService.adminCancelReservation(
-          req.params.reservationId
-        );
+      message:error.message
 
-
-      return res.status(200).json({
-
-        success:true,
-
-        message:result.message
-
-      });
-
-
-    }catch(error:any){
-
-      return res.status(
-        error.statusCode || 400
-      ).json({
-
-        success:false,
-
-        message:error.message
-
-      });
-
-    }
+    });
 
   }
 
+}
 
 }
 

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import userService from "../services/user.service";
+import activityLogService from "../services/admin/activityLogs.service";
 
 class UserController {
   // Register User
@@ -8,6 +9,13 @@ class UserController {
     
     try {
       const result = await userService.register(req.body);
+
+      await activityLogService.create({
+  user: result,
+  action: "Student Registration",
+  description: `${result.fullName} registered a new account.`,
+  ipAddress: req.ip,
+});
 
       return res.status(201).json({
         success: true,
@@ -23,7 +31,6 @@ class UserController {
   }
 
   // Login User
-// Login User
 async login(req: Request, res: Response) {
 
   console.log("CONTROLLER LOGIN HIT");
@@ -48,7 +55,15 @@ async login(req: Request, res: Response) {
     }
 
 
-    // Normal login
+    // Create activity log after successful login
+    await activityLogService.create({
+      user: result.user,
+      action: "User Login",
+      description: `${result.user.fullName} logged into the system.`,
+      ipAddress: req.ip,
+    });
+
+
     res.cookie("library_token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -76,6 +91,7 @@ async login(req: Request, res: Response) {
       success: false,
       message: error.message,
     });
+
   }
 }
 
@@ -106,6 +122,13 @@ async login(req: Request, res: Response) {
         (req.user as any)._id.toString(),
         req.body
       );
+
+      await activityLogService.create({
+  user: req.user,
+  action: "Profile Updated",
+  description: `${req.user?.fullName} updated their profile.`,
+  ipAddress: req.ip,
+});
 
       return res.status(200).json({
         success: true,
@@ -163,6 +186,14 @@ async login(req: Request, res: Response) {
         currentPassword,
         newPassword
       );
+      await activityLogService.create({
+  user: req.user,
+  action: "Password Changed",
+  description: `${req.user?.fullName} changed their password.`,
+  ipAddress: req.ip,
+});
+
+
 
       return res.status(200).json({
         success: true,
@@ -199,6 +230,13 @@ async login(req: Request, res: Response) {
       const result = await userService.deleteAccount(
         (req.user as any)._id.toString()
       );
+
+      await activityLogService.create({
+  user: req.user,
+  action: "Account Deleted",
+  description: `${req.user?.fullName} deleted their account.`,
+  ipAddress: req.ip,
+});
 
       return res.status(200).json({
         success: true,

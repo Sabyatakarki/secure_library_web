@@ -1,7 +1,6 @@
 import ActivityLog from "../../models/admin/activityLogs.model";
 
 class ActivityLogService {
-  // Create Activity Log
   async create({
     user,
     action,
@@ -13,29 +12,38 @@ class ActivityLogService {
     description: string;
     ipAddress?: string;
   }) {
-    return await ActivityLog.create({
-      user: user?._id,
-      fullName: user?.fullName || "System",
-      role: user?.role || "System",
-      action,
-      description,
-      ipAddress,
-    });
+    try {
+      console.log("Creating activity log...");
+      console.log(user);
+
+      const log = await ActivityLog.create({
+        user: user?._id,
+        fullName: user?.fullName || "System",
+        role: user?.role || "System",
+        action,
+        description,
+        ipAddress,
+      });
+
+      console.log("Activity log saved:", log);
+
+      return log;
+    } catch (error) {
+      console.error("Activity Log Error:", error);
+      throw error;
+    }
   }
 
-  // Get All Activity Logs
   async getAll() {
     return await ActivityLog.find()
       .populate("user", "fullName email studentId role")
       .sort({ createdAt: -1 });
   }
 
-  // Get Activity Logs By User
   async getByUser(userId: string) {
-    return await ActivityLog.find({
-      user: userId,
-    })
-      .sort({ createdAt: -1 });
+    return await ActivityLog.find({ user: userId }).sort({
+      createdAt: -1,
+    });
   }
 }
 

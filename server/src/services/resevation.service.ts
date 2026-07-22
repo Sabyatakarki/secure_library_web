@@ -2,9 +2,11 @@ import Reservation from "../models/reservation.model";
 import Book from "../models/book.model";
 import Rental from "../models/rental.model";
 import { HttpError } from "../error/http-error";
+import activityLogService from "./admin/activityLogs.service";
+import userRepository from "../repositories/user.repository";
 
 class ReservationService {
-  async reserveBook(userId: string, bookId: string) {
+  async reserveBook(userId: string, bookId: string,ipAddress?: string) {
 
     const book = await Book.findById(bookId);
 
@@ -64,6 +66,14 @@ class ReservationService {
 
 
     await book.save();
+  const user = await userRepository.findById(userId);
+
+await activityLogService.create({
+  user,
+  action: "Book Reserved",
+  description: `${user?.fullName} reserved "${book.title}"`,
+  ipAddress,
+});
 
 
     return reservation;
@@ -167,10 +177,10 @@ class ReservationService {
       });
 
   }
-  async approveReservation(
-    reservationId:string,
-    librarianId:string
-  ){
+ async approveReservation(
+  reservationId: string,
+  librarianId: string
+){ 
 
 
     const reservation =
@@ -247,15 +257,32 @@ class ReservationService {
 
       });
 
+      const librarian = await userRepository.findById(librarianId);
+
+const student = await userRepository.findById(
+  reservation.user.toString()
+);
+
+const book = await Book.findById(
+  reservation.book.toString()
+);
+
+await activityLogService.create({
+  user: librarian,
+  action: "Reservation Approved",
+  description: `${librarian?.fullName} approved "${book?.title}" for ${student?.fullName}`,
+});
+
 
 
     return rental;
 
   }
 
-  async adminCancelReservation(
-    reservationId:string
-  ){
+  async cancelReservationByLibrarian(
+  reservationId: string,
+  librarianId: string
+){
 
 
     const reservation =
@@ -312,7 +339,23 @@ class ReservationService {
 
       await book.save();
 
+   const librarian = await userRepository.findById(
+  librarianId
+);
+
+const student = await userRepository.findById(
+  String(reservation.user)
+);
+
+await activityLogService.create({
+  user: librarian,
+  action: "Reservation Cancelled",
+  description: `${librarian?.fullName} cancelled ${student?.fullName}'s reservation for "${book?.title}"`,
+  ipAddress: undefined,
+});
+
     }
+    
 
 
 
