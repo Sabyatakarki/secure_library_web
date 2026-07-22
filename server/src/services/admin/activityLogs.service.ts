@@ -2,7 +2,7 @@ import ActivityLog from "../../models/admin/activityLogs.model";
 
 class ActivityLogService {
   // Create Activity Log
-  async createLog({
+  async create({
     user,
     action,
     description,
@@ -24,14 +24,14 @@ class ActivityLogService {
   }
 
   // Get All Activity Logs
-  async getAllLogs() {
+  async getAll() {
     return await ActivityLog.find()
       .populate("user", "fullName email studentId role")
       .sort({ createdAt: -1 });
   }
 
   // Get Activity Logs By User
-  async getLogsByUser(userId: string) {
+  async getByUser(userId: string) {
     return await ActivityLog.find({
       user: userId,
     })

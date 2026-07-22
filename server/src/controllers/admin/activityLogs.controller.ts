@@ -4,7 +4,7 @@ import activityLogService from "../../services/admin/activityLogs.service";
 class AdminActivityController {
   async getAllLogs(req: Request, res: Response) {
     try {
-      const logs = await activityLogService.getAllLogs();
+      const logs = await activityLogService.getAll();
 
       return res.status(200).json({
         success: true,

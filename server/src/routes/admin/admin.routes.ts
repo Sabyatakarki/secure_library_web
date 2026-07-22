@@ -3,6 +3,7 @@ import { authorizedMiddleware } from "../../middleware/auth.middlware";
 import adminRentalController from "../../controllers/admin/adminRental.controller";
 import { AdminUserController } from "../../controllers/admin/adminUser.controller";
 import adminReservationController from "../../controllers/admin/adminReservation.controller";
+import adminActivityController from "../../controllers/admin/activityLogs.controller";
 
 import { uploads } from "../../middleware/upload.middlware";
 
@@ -96,6 +97,12 @@ router.put(
   adminRentalController.returnBook
 );
 
+
+//Admin activity logsss
+router.get(
+  "/activity-logs",
+  adminActivityController.getAllLogs
+);
 
 
 export default router;

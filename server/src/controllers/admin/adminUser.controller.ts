@@ -5,6 +5,7 @@ import {
 } from "../../dtos/user.dtos";
 
 import { AdminUserService } from "../../services/admin/adminUser.service";
+import activityLogService from "../../services/admin/activityLogs.service";
 
 
 const adminUserService = new AdminUserService();
@@ -34,9 +35,16 @@ export class AdminUserController {
 
 
       const newUser =
-        await adminUserService.createUser(
-          userData
-        );
+  await adminUserService.createUser(
+    userData
+  );
+
+await activityLogService.create({
+  user: req.user?._id,
+  action: "Created User",
+  description: `Created user ${newUser.fullName} by ${req.user?.fullName || "Admin"}`,
+  ipAddress: req.ip,
+});
 
 
       return res.status(201).json({
@@ -223,11 +231,18 @@ export class AdminUserController {
 
 
 
-      const updatedUser =
-        await adminUserService.updateUser(
-          req.params.id as string,
-          userData
-        );
+     const updatedUser =
+  await adminUserService.updateUser(
+    req.params.id as string,
+    userData
+  );
+
+await activityLogService.create({
+  user: req.user?._id,
+  action: "Updated User",
+  description: `Updated user ${updatedUser.fullName}`,
+  ipAddress: req.ip,
+});
 
 
 
