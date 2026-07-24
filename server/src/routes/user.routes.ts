@@ -2,7 +2,11 @@ import { Router } from "express";
 import userController from "../controllers/user.controller";
 import { authorizedMiddleware } from "../middleware/auth.middlware";
 import { uploads } from "../middleware/upload.middlware";
-import {loginLimiter,registerLimiter,forgotPasswordLimiter,} from "../middleware/rateLimit.middlware";
+import {
+  loginLimiter,
+  registerLimiter,
+  forgotPasswordLimiter,
+} from "../middleware/rateLimit.middlware";
 
 const router = Router();
 
@@ -11,22 +15,30 @@ router.post(
   registerLimiter,
   userController.register
 );
+
 router.post(
   "/login",
   loginLimiter,
   userController.login
 );
-router.post("/logout", authorizedMiddleware, userController.logout);
 
+router.post("/logout", authorizedMiddleware, userController.logout);
 
 router.get("/profile", authorizedMiddleware, userController.getProfile);
 
 router.put("/profile", authorizedMiddleware, userController.updateProfile);
 
-router.post("/forgot-password", userController.sendResetPasswordEmail);
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  userController.sendResetPasswordEmail
+);
 
-router.post("/reset-password/:token", userController.resetPassword);
-
+router.post(
+  "/reset-password/:token",
+  forgotPasswordLimiter,
+  userController.resetPassword
+);
 
 router.put(
   "/profile-picture",
@@ -46,6 +58,7 @@ router.get("/", authorizedMiddleware, userController.getAllUsers);
 router.delete(
   "/delete-account",
   authorizedMiddleware,
-  userController.deleteAccount);
+  userController.deleteAccount
+);
 
 export default router;

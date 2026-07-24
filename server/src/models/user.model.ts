@@ -24,7 +24,10 @@ export interface IUser extends Document {
   accountLocked: boolean;
   lockUntil?: Date | null;
 
-   // MFA fields
+  // Password Expiration field
+  passwordUpdatedAt: Date;
+
+  // MFA fields
   mfaEnabled: boolean;
   mfaSecret?: string | null;
 
@@ -114,25 +117,32 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       default: 0,
     },
+
     lockUntil: {
-  type: Date,
-  default: null,
-},
+      type: Date,
+      default: null,
+    },
 
     accountLocked: {
       type: Boolean,
       default: false,
     },
 
-    mfaEnabled: {
-  type: Boolean,
-  default: false,
-},
+    // Password Expiration field
+    passwordUpdatedAt: {
+      type: Date,
+      default: Date.now,
+    },
 
-mfaSecret: {
-  type: String,
-  default: null,
-},
+    mfaEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    mfaSecret: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -89,22 +89,31 @@ export default function LoginForm() {
     try {
       const response = await loginUser(formData);
 
+      // Check for 90-day password expiration
+// Password expired
+if (!response.success && response.isPasswordExpired) {
+  setErrorMessage(response.message);
 
-// MFA required
+  setTimeout(() => {
+    router.push(
+      `/forget-password?email=${encodeURIComponent(
+        response.email || formData.email
+      )}`
+    );
+  }, 2000);
 
-if (response.requiresMfa) {
-
-  localStorage.setItem(
-    "mfaEmail",
-    response.email
-  );
-
-  router.push("/mfa_login");
-
+  setLoading(false);
   return;
 }
 
-if (!response.success) {
+      // MFA required
+      if (response.requiresMfa) {
+        localStorage.setItem("mfaEmail", response.email);
+        router.push("/mfa_login");
+        return;
+      }
+
+      if (!response.success) {
         // Handle server-enforced account lockouts cleanly without incrementing local failure count
         if (response.message?.includes("Account is locked")) {
           setErrorMessage(response.message);

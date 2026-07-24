@@ -10,18 +10,21 @@ import adminRoutes from "./routes/admin/admin.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import paymentRoutes from "./routes/payment.routes";
 import { apiLimiter } from "./middleware/rateLimit.middlware";
+import helmet from "helmet";
 
 
 const app = express();
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Parse Cookies (Must come before routes)
 app.use(cookieParser());
 
-// CORS
 app.use(
   cors({
     origin: [
@@ -31,8 +34,6 @@ app.use(
     credentials: true,
   })
 );
-
-app.use(apiLimiter);
 
 // Static Files
 app.use(
@@ -45,17 +46,22 @@ app.use(
   express.static(path.join(__dirname, "../public/book_covers"))
 );
 
+// General API Rate Limiting
+app.use("/api/books", apiLimiter);
+app.use("/api/reservations", apiLimiter);
+app.use("/api/rentals", apiLimiter);
+app.use("/api/payment", apiLimiter);
+app.use("/api/admin", apiLimiter);
 
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/mfa", mfaRoutes);
-
 app.use("/api/books", bookRoutes);
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/rentals", rentalRoutes);
-
 app.use("/api/admin", adminRoutes);
-
 app.use("/api/payment", paymentRoutes);
+
+
 
 export default app;

@@ -52,15 +52,18 @@ class UserRepository {
 
   // Update Password
   async updatePassword(
-    id: string,
-    password: string
-  ): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(
-      id,
-      { password },
-      { new: true }
-    );
-  }
+  id: string,
+  password: string
+): Promise<IUser | null> {
+  return await User.findByIdAndUpdate(
+    id,
+    {
+      password,
+      passwordUpdatedAt: new Date(),
+    },
+    { new: true }
+  );
+}
 
   // Update Last Login
   async updateLastLogin(id: string): Promise<void> {

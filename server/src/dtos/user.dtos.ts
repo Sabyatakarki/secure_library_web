@@ -9,12 +9,12 @@ export interface RegisterUserDto {
   address?: string;
   profilePicture?: string;
   role?: "Student" | "Admin";
+  passwordUpdatedAt?: Date;
 }
 
 export interface LoginUserDto {
   email: string;
   password: string;
-  ipAddress?: string;
 }
 
 export interface UpdateUserDto {
@@ -24,10 +24,18 @@ export interface UpdateUserDto {
   semester?: number;
   address?: string;
   profilePicture?: string;
+  password?: string;
+  passwordUpdatedAt?: Date;
 }
 
 export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+  confirmPassword?: string;
 }

@@ -6,10 +6,11 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../../lib/api/axios";
 
 interface UserProfile {
-  fullName:string;
-  role:string;
-  mfaEnabled:boolean;
+  fullName: string;
+  role: string;
+  mfaEnabled: boolean;
 }
+
 interface NavItem {
   label: string;
   href: string;
@@ -97,12 +98,10 @@ export default function SettingsPage() {
   const [mfaLoading, setMfaLoading] = useState(false);
   const [mfaStatus, setMfaStatus] = useState({ success: "", error: "" });
 
-  // Close mobile sidebar on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Safe profile fetcher
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
@@ -122,12 +121,10 @@ export default function SettingsPage() {
             mfaEnabled: !!data.mfaEnabled,
           });
 
-          // Sync initial MFA state from database
           setMfaEnabled(!!data.mfaEnabled);
         }
       } catch (error: any) {
         if (error.name !== "CanceledError" && isMounted) {
-          console.error("Profile Fetch Error:", error);
           setUser({
             fullName: "Welcome Student",
             role: "Student",
@@ -162,7 +159,22 @@ export default function SettingsPage() {
     e.preventDefault();
     setPasswordStatus({ success: "", error: "" });
 
+    if (!passwordData.currentPassword) {
+      setPasswordStatus({ success: "", error: "Please enter your current password." });
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
+
+      if (
+  passwordData.currentPassword === passwordData.newPassword
+) {
+  setPasswordStatus({
+    success: "",
+    error: "New password must be different from your current password.",
+  });
+  return;
+}
       setPasswordStatus({ success: "", error: "New passwords do not match." });
       return;
     }
@@ -175,15 +187,17 @@ export default function SettingsPage() {
     setIsUpdatingPassword(true);
 
     try {
-      await api.patch("/users/password", {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      const response = await api.put("/users/change-password", {
+  currentPassword: passwordData.currentPassword,
+  newPassword: passwordData.newPassword,
+});
 
       setPasswordStatus({
-        success: "Password successfully updated over secure channels.",
+        success: response.data.message || "Password successfully updated.",
         error: "",
       });
+      
+      // Reset input fields
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error: any) {
       setPasswordStatus({
@@ -225,9 +239,7 @@ export default function SettingsPage() {
     setMfaStatus({ success: "", error: "" });
 
     try {
-      await api.post("/mfa/verify", {
-  token: mfaToken,
-});
+      await api.post("/mfa/verify", { token: mfaToken });
       setMfaEnabled(true);
       setShowMfaSetup(false);
       setQrCode(null);
@@ -301,6 +313,11 @@ export default function SettingsPage() {
     </nav>
   );
 
+
+
+
+
+
   return (
     <div className="flex h-screen w-screen max-h-screen max-w-full overflow-hidden bg-slate-50 font-sans antialiased text-slate-800 relative">
       {/* Desktop Sidebar */}
@@ -318,7 +335,7 @@ export default function SettingsPage() {
         </div>
       </aside>
 
-      {/* Mobile Sidebar Overlay/Drawer */}
+      {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex" role="dialog" aria-modal="true">
           <div
@@ -372,7 +389,6 @@ export default function SettingsPage() {
             </h1>
           </div>
 
-          {/* User Profile Badge */}
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard/profile"
@@ -512,7 +528,6 @@ export default function SettingsPage() {
                 </span>
               </div>
 
-              {/* MFA Global Feedback Banners */}
               {mfaStatus.success && (
                 <div className="mt-4 p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-xl text-xs font-semibold flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
@@ -527,7 +542,6 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* MFA Card Control Row */}
               <div className="mt-5 p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div
@@ -564,11 +578,9 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              {/* MFA Setup Container (QR Code & Verification Input) */}
               {!mfaEnabled && showMfaSetup && qrCode && (
                 <div className="mt-5 p-5 bg-white border border-blue-100 rounded-xl space-y-5 shadow-xs">
                   <div className="flex flex-col sm:flex-row items-center gap-6">
-                    {/* QR Code Container */}
                     <div className="p-3 bg-white border border-slate-200 rounded-2xl shrink-0 shadow-xs">
                       <img src={qrCode} alt="MFA QR Code" className="w-36 h-36 object-contain rounded-lg" />
                     </div>
@@ -581,7 +593,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Code Verification Form */}
                   <form onSubmit={handleVerifyMfa} className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
                     <div className="w-full sm:w-48">
                       <input

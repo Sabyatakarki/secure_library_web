@@ -34,6 +34,9 @@ export const UserSchema = z.object({
 
   isActive: z.boolean().default(true),
 
+  // Password Expiration Tracking
+  passwordUpdatedAt: z.date().default(() => new Date()),
+
   // MFA fields
   mfaEnabled: z.boolean().default(false),
 
